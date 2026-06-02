@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administración — GestorSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    :root { --font: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .sidebar-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;display:none; }
+    .sidebar-overlay.active { display:block; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+    .fade-in { animation:slideUp .3s ease both; }
+    .action-btns { display:flex;gap:.375rem;flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div style="text-align:center;">
+    <div class="spinner spinner-lg" style="margin:0 auto 1rem;"></div>
+    <div style="color:var(--text-secondary);font-size:.875rem;">Cargando panel...</div>
+  </div>
+</div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">SS</div>
+      <span class="sidebar-brand-name">GestorSS Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Panel</div>
+      <ul>
+        <li class="nav-item active" id="nav-dashboard"><a href="#" onclick="showSection('dashboard');return false;"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li class="nav-item" id="nav-students"><a href="#" onclick="showSection('students');return false;"><span class="nav-icon">👥</span>Estudiantes</a></li>
+        <li class="nav-item" id="nav-hours"><a href="#" onclick="showSection('hours');return false;"><span class="nav-icon">⏱️</span>Horas de Servicio</a></li>
+        <li class="nav-item" id="nav-zones"><a href="#" onclick="showSection('zones');return false;"><span class="nav-icon">🗺️</span>Zonas</a></li>
+        <li class="nav-item" id="nav-certificates"><a href="#" onclick="showSection('certificates');return false;"><span class="nav-icon">📜</span>Certificados</a></li>
+        <div class="nav-section-label" style="margin-top:.75rem;">Sistema</div>
+        <li class="nav-item" id="nav-notifications"><a href="#" onclick="showSection('notifications');return false;"><span class="nav-icon">🔔</span>Notificaciones<span class="notif-badge" id="sidebarNotifBadge" style="position:relative;top:auto;right:auto;margin-left:auto;display:none;"></span></a></li>
+        <li class="nav-item"><button onclick="handleLogout()"><span class="nav-icon">🚪</span>Cerrar sesión</button></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Admin</div>
+          <div class="sidebar-user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      <div class="topbar-actions">
+        <div class="relative" id="notifWrapper">
+          <button class="notif-btn" onclick="toggleNotifDropdown()">
+            🔔
+            <span class="notif-badge hidden" id="topbarNotifBadge">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;">Notificaciones</span>
+              <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Marcar leídas</button>
+            </div>
+            <div class="notif-list" id="notifList"><div class="notif-empty">Cargando...</div></div>
+            <div class="notif-footer">
+              <a href="#" class="text-sm text-primary" onclick="showSection('notifications');closeNotifDropdown();return false;">Ver todas</a>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div class="avatar" id="topbarAvatar">A</div>
+          <span style="font-size:.875rem;font-weight:500;" id="topbarName">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- ═══════════ DASHBOARD ═══════════ -->
+      <div id="section-dashboard" class="section-content">
+        <div class="page-header fade-in">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Resumen general del sistema de servicio social</p>
+        </div>
+        <div class="grid-4 fade-in" style="margin-bottom:1.5rem;">
+          <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-value" id="st-total">—</div><div class="stat-label">Estudiantes totales</div></div></div>
+          <div class="stat-card"><div class="stat-icon yellow">⏳</div><div><div class="stat-value" id="st-active">—</div><div class="stat-label">En progreso</div></div></div>
+          <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="st-completed">—</div><div class="stat-label">Completados</div></div></div>
+          <div class="stat-card"><div class="stat-icon red">📜</div><div><div class="stat-value" id="st-pending">—</div><div class="stat-label">Cert. pendientes</div></div></div>
+        </div>
+        <div class="grid-2" style="margin-bottom:1.5rem;">
+          <div class="stat-card" style="grid-column:1/-1;">
+            <div class="stat-icon purple">⏱️</div>
+            <div><div class="stat-value" id="st-hours">—</div><div class="stat-label">Total horas registradas en el sistema</div></div>
+          </div>
+        </div>
+        <!-- Recent students -->
+        <div class="card fade-in">
+          <div class="card-header">
+            <span class="card-title">Estudiantes recientes</span>
+            <a href="#" class="btn btn-ghost btn-sm" onclick="showSection('students');return false;">Ver todos →</a>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrapper" style="box-shadow:none;border:none;border-radius:0;">
+              <table class="table">
+                <thead><tr><th>Nombre</th><th>Código</th><th>Carrera</th><th>Estado</th><th>Progreso</th><th>Acciones</th></tr></thead>
+                <tbody id="dashStudentsBody"><tr><td colspan="6" class="table-empty">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ STUDENTS ═══════════ -->
+      <div id="section-students" class="section-content hidden">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div><h1 class="page-title">Estudiantes</h1><p class="page-subtitle">Gestión completa de estudiantes inscritos</p></div>
+          <button class="btn btn-primary" onclick="openStudentModal()">+ Nuevo estudiante</button>
+        </div>
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-body" style="padding:1rem;">
+            <div class="filter-bar">
+              <div class="search-input input-group">
+                <input type="text" id="studentSearch" class="form-control" placeholder="Buscar por nombre, email, código..." oninput="filterStudents()" />
+                <button class="btn btn-secondary" onclick="loadStudents()">🔍</button>
+              </div>
+              <select class="form-control filter-select" id="studentStatus" onchange="filterStudents()">
+                <option value="">Todos los estados</option>
+                <option value="active">Activos</option>
+                <option value="completed">Completados</option>
+                <option value="suspended">Suspendidos</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>Nombre</th><th>Email</th><th>Código</th><th>Carrera</th><th>Estado</th><th>Progreso</th><th>Zona</th><th>Acciones</th></tr></thead>
+            <tbody id="studentsTableBody"><tr><td colspan="8" class="table-empty">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════ HOURS ═══════════ -->
+      <div id="section-hours" class="section-content hidden">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div><h1 class="page-title">Horas de Servicio</h1><p class="page-subtitle">Registro y gestión de jornadas de servicio social</p></div>
+          <button class="btn btn-primary" onclick="openHoursModal()">+ Registrar horas</button>
+        </div>
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-body" style="padding:1rem;">
+            <div class="filter-bar">
+              <select class="form-control filter-select" id="hoursStudentFilter" onchange="loadHours()">
+                <option value="">Todos los estudiantes</option>
+              </select>
+              <input type="date" id="hoursFrom" class="form-control" style="max-width:160px;" onchange="loadHours()" />
+              <input type="date" id="hoursTo" class="form-control" style="max-width:160px;" onchange="loadHours()" />
+              <button class="btn btn-secondary" onclick="clearHoursFilter()">Limpiar</button>
+              <div style="margin-left:auto;font-weight:600;" id="hoursTotalLabel"></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>Estudiante</th><th>Fecha</th><th>Horas</th><th>Observación</th><th>Registrado por</th><th>Fecha reg.</th><th>Acciones</th></tr></thead>
+            <tbody id="hoursTableBody"><tr><td colspan="7" class="table-empty">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════ ZONES ═══════════ -->
+      <div id="section-zones" class="section-content hidden">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div><h1 class="page-title">Zonas de Servicio</h1><p class="page-subtitle">Centros de servicio social y asignación de estudiantes</p></div>
+          <div style="display:flex;gap:.75rem;">
+            <button class="btn btn-secondary" onclick="openAssignZoneModal()">📍 Asignar zona</button>
+            <button class="btn btn-primary" onclick="openZoneModal()">+ Nueva zona</button>
+          </div>
+        </div>
+        <div id="zonesGrid" class="grid-2" style="gap:1rem;"></div>
+      </div>
+
+      <!-- ═══════════ CERTIFICATES ═══════════ -->
+      <div id="section-certificates" class="section-content hidden">
+        <div class="page-header">
+          <h1 class="page-title">Certificados</h1>
+          <p class="page-subtitle">Gestión de solicitudes y carga de certificados</p>
+        </div>
+        <div class="tabs" style="margin-bottom:1.5rem;">
+          <button class="tab-btn active" onclick="switchCertTab('requests',this)">Solicitudes pendientes</button>
+          <button class="tab-btn" onclick="switchCertTab('all-requests',this)">Todas las solicitudes</button>
+          <button class="tab-btn" onclick="switchCertTab('uploaded',this)">Certificados subidos</button>
+        </div>
+        <div id="cert-tab-requests" class="cert-tab">
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Estudiante</th><th>Código</th><th>Horas</th><th>Solicitado</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="pendingCertBody"><tr><td colspan="6" class="table-empty">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="cert-tab-all-requests" class="cert-tab hidden">
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Estudiante</th><th>Código</th><th>Solicitado</th><th>Estado</th><th>Revisado por</th><th>Notas</th></tr></thead>
+              <tbody id="allCertBody"><tr><td colspan="6" class="table-empty">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="cert-tab-uploaded" class="cert-tab hidden">
+          <div style="margin-bottom:1rem;display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="openUploadCertModal()">⬆ Subir certificado</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Estudiante</th><th>Código</th><th>Subido</th><th>Por</th><th>Notas</th><th>Acciones</th></tr></thead>
+              <tbody id="uploadedCertBody"><tr><td colspan="6" class="table-empty">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ NOTIFICATIONS ═══════════ -->
+      <div id="section-notifications" class="section-content hidden">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <div><h1 class="page-title">Notificaciones</h1><p class="page-subtitle">Tus alertas y avisos del sistema</p></div>
+          <button class="btn btn-secondary" onclick="markAllRead()">✓ Marcar todas leídas</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0;" id="allNotifList"><div class="notif-empty">Cargando...</div></div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- Student Modal -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="studentModalTitle">Nuevo estudiante</span>
+      <button class="modal-close" onclick="closeModal('studentModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="studentForm" onsubmit="submitStudentForm(event)">
+        <input type="hidden" id="studentId" />
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Nombre completo *</label>
+            <input type="text" id="stuName" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Código de matrícula *</label>
+            <input type="text" id="stuCode" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico *</label>
+          <input type="email" id="stuEmail" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña <span id="passHint" style="color:var(--text-muted);font-size:.8125rem;">(requerida)</span></label>
+          <input type="password" id="stuPassword" class="form-control" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Carrera *</label>
+            <input type="text" id="stuCareer" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Semestre</label>
+            <select id="stuSemester" class="form-control">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Horas requeridas</label>
+            <input type="number" id="stuHours" class="form-control" value="480" min="1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select id="stuStatus" class="form-control">
+              <option value="active">Activo</option>
+              <option value="completed">Completado</option>
+              <option value="suspended">Suspendido</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Fecha de inicio</label>
+            <input type="date" id="stuStartDate" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de fin</label>
+            <input type="date" id="stuEndDate" class="form-control" />
+          </div>
+        </div>
+      </form>
+      <div id="studentFormError" class="alert alert-danger hidden" style="margin-top:.75rem;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('studentForm').requestSubmit()" id="studentSaveBtn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar acción</span>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage">¿Estás seguro?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Cancelar</button>
+      <button class="btn btn-danger" id="confirmBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hours Modal -->
+<div class="modal-overlay" id="hoursModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="hoursModalTitle">Registrar horas</span>
+      <button class="modal-close" onclick="closeModal('hoursModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="hoursForm" onsubmit="submitHoursForm(event)">
+        <input type="hidden" id="hoursId" />
+        <div class="form-group">
+          <label class="form-label">Estudiante *</label>
+          <select id="hoursStudentSel" class="form-control" required></select>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Fecha de servicio *</label>
+            <input type="date" id="hoursDate" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horas *</label>
+            <input type="number" id="hoursAmount" class="form-control" step="0.5" min="0.5" max="24" placeholder="Ej: 8" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observación</label>
+          <textarea id="hoursObs" class="form-control" rows="3" placeholder="Descripción de las actividades realizadas..."></textarea>
+        </div>
+      </form>
+      <div id="hoursFormError" class="alert alert-danger hidden" style="margin-top:.75rem;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('hoursModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('hoursForm').requestSubmit()" id="hoursSaveBtn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Zone Modal -->
+<div class="modal-overlay" id="zoneModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="zoneModalTitle">Nueva zona</span>
+      <button class="modal-close" onclick="closeModal('zoneModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="zoneForm" onsubmit="submitZoneForm(event)">
+        <input type="hidden" id="zoneId" />
+        <div class="form-group">
+          <label class="form-label">Nombre de la zona *</label>
+          <input type="text" id="zoneName" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="zoneDesc" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supervisor</label>
+          <input type="text" id="zoneSupervisor" class="form-control" placeholder="Nombre del supervisor responsable" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dirección</label>
+          <input type="text" id="zoneAddress" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="zoneActive" class="form-control">
+            <option value="1">Activa</option>
+            <option value="0">Inactiva</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('zoneModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('zoneForm').requestSubmit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Zone Modal -->
+<div class="modal-overlay" id="assignZoneModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Asignar zona a estudiante</span>
+      <button class="modal-close" onclick="closeModal('assignZoneModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="assignZoneForm" onsubmit="submitAssignZone(event)">
+        <div class="form-group">
+          <label class="form-label">Estudiante *</label>
+          <select id="assignStudentSel" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zona *</label>
+          <select id="assignZoneSel" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notas (opcional)</label>
+          <textarea id="assignNotes" class="form-control" rows="2" placeholder="Observaciones sobre la asignación..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('assignZoneModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('assignZoneForm').requestSubmit()">Asignar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Certificate Modal -->
+<div class="modal-overlay" id="uploadCertModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Subir certificado</span>
+      <button class="modal-close" onclick="closeModal('uploadCertModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="uploadCertForm" onsubmit="submitUploadCert(event)">
+        <div class="form-group">
+          <label class="form-label">Estudiante *</label>
+          <select id="uploadCertStudent" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Solicitud relacionada (opcional)</label>
+          <select id="uploadCertRequest" class="form-control">
+            <option value="">Sin solicitud</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Archivo del certificado (PDF) *</label>
+          <input type="file" id="uploadCertFile" class="form-control" accept=".pdf,.jpg,.png" required />
+          <div class="form-hint">Formatos permitidos: PDF, JPG, PNG. Máximo 10MB.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notas</label>
+          <textarea id="uploadCertNotes" class="form-control" rows="2" placeholder="Observaciones sobre el certificado..."></textarea>
+        </div>
+      </form>
+      <div id="uploadCertError" class="alert alert-danger hidden" style="margin-top:.75rem;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('uploadCertModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('uploadCertForm').requestSubmit()" id="uploadCertBtn">Subir certificado</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Detail Modal (read-only hours) -->
+<div class="modal-overlay" id="studentDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="detailModalTitle">Detalle del estudiante</span>
+      <button class="modal-close" onclick="closeModal('studentDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="studentDetailBody">Cargando...</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+  // ── State ──
+  let allStudents = [];
+  let allZones    = [];
+
+  // ── Init ──
+  (async function init() {
+    const token = localStorage.getItem('ss_token');
+    const role  = localStorage.getItem('ss_role');
+    if (!token) { window.location.href = '../auth/'; return; }
+    if (role !== 'admin') { window.location.href = '../home/'; return; }
+
+    const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+    const initial = (user.full_name || 'A').charAt(0).toUpperCase();
+    ['sidebarAvatar','topbarAvatar'].forEach(id => document.getElementById(id).textContent = initial);
+    document.getElementById('sidebarName').textContent  = user.full_name || 'Admin';
+    document.getElementById('topbarName').textContent   = (user.full_name || '').split(' ')[0] || 'Admin';
+
+    await Promise.all([loadDashboard(), loadStudents(), loadZones()]);
+    document.getElementById('loadingOverlay').style.display = 'none';
+    setupSSE();
+    loadNotifications();
+  })();
+
+  // ── Dashboard ──
+  async function loadDashboard() {
+    const students = await API.get('students');
+    allStudents = Array.isArray(students) ? students : [];
+
+    const total     = allStudents.length;
+    const active    = allStudents.filter(s => s.status === 'active').length;
+    const completed = allStudents.filter(s => s.status === 'completed').length;
+    const totalHrs  = allStudents.reduce((a, s) => a + parseFloat(s.completed_hours || 0), 0);
+
+    document.getElementById('st-total').textContent     = total;
+    document.getElementById('st-active').textContent    = active;
+    document.getElementById('st-completed').textContent = completed;
+    document.getElementById('st-hours').textContent     = totalHrs.toFixed(1) + 'h';
+
+    const certRes = await API.get('certificates/requests');
+    const pending = Array.isArray(certRes) ? certRes.filter(r => r.status === 'pending').length : 0;
+    document.getElementById('st-pending').textContent = pending;
+
+    // Recent students table
+    const tbody = document.getElementById('dashStudentsBody');
+    const recent = allStudents.slice(0, 8);
+    tbody.innerHTML = recent.length
+      ? recent.map(s => {
+          const pct = s.required_hours > 0 ? Math.min(100, (s.completed_hours / s.required_hours) * 100).toFixed(0) : 0;
+          const [cls, lbl] = statusBadge(s.status);
+          return `<tr>
+            <td><strong>${s.full_name}</strong></td>
+            <td style="font-size:.8125rem;color:var(--text-muted);">${s.enrollment_code}</td>
+            <td style="font-size:.8125rem;">${s.career}</td>
+            <td><span class="badge ${cls}">${lbl}</span></td>
+            <td style="min-width:120px;">
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <div class="progress-wrap" style="flex:1;height:6px;"><div class="progress-bar ${pct>=100?'success':''}" style="width:${pct}%;"></div></div>
+                <span style="font-size:.75rem;color:var(--text-muted);white-space:nowrap;">${pct}%</span>
+              </div>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn btn-secondary btn-sm" onclick="viewStudentDetail(${s.student_id})">Ver</button>
+                <button class="btn btn-primary btn-sm" onclick="openStudentModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">✏️</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="6" class="table-empty">Sin estudiantes registrados</td></tr>';
+  }
+
+  // ── Students ──
+  async function loadStudents() {
+    const res = await API.get('students');
+    allStudents = Array.isArray(res) ? res : [];
+    renderStudentsTable(allStudents);
+    populateStudentSelects();
+  }
+
+  function filterStudents() {
+    const q      = document.getElementById('studentSearch')?.value.toLowerCase() || '';
+    const status = document.getElementById('studentStatus')?.value || '';
+    const filtered = allStudents.filter(s =>
+      (!q || s.full_name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.enrollment_code.toLowerCase().includes(q) || s.career.toLowerCase().includes(q)) &&
+      (!status || s.status === status)
+    );
+    renderStudentsTable(filtered);
+  }
+
+  function renderStudentsTable(list) {
+    const tbody = document.getElementById('studentsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = list.length
+      ? list.map(s => {
+          const pct = s.required_hours > 0 ? Math.min(100, (s.completed_hours / s.required_hours) * 100).toFixed(0) : 0;
+          const [cls, lbl] = statusBadge(s.status);
+          return `<tr>
+            <td><strong>${s.full_name}</strong><br><span style="font-size:.75rem;color:var(--text-muted);">${s.email}</span></td>
+            <td style="font-size:.8125rem;">${s.enrollment_code}</td>
+            <td style="font-size:.8125rem;max-width:150px;">${s.career}</td>
+            <td><span class="badge ${cls}">${lbl}</span></td>
+            <td style="min-width:120px;">
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <div class="progress-wrap" style="flex:1;height:6px;"><div class="progress-bar ${pct>=100?'success':''}" style="width:${pct}%;"></div></div>
+                <span style="font-size:.75rem;color:var(--text-muted);white-space:nowrap;">${parseFloat(s.completed_hours||0)}/${s.required_hours}h</span>
+              </div>
+            </td>
+            <td style="font-size:.8125rem;color:var(--text-muted);">${s.zone_name || '—'}</td>
+            <td>
+              <div class="action-btns">
+                <button class="btn btn-ghost btn-sm" onclick="viewStudentDetail(${s.student_id})">👁</button>
+                <button class="btn btn-secondary btn-sm" onclick="openStudentModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="confirmDeleteStudent(${s.student_id},'${s.full_name}')">🗑</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="8" class="table-empty">Sin resultados</td></tr>';
+  }
+
+  function openStudentModal(student) {
+    document.getElementById('studentId').value      = student?.student_id || '';
+    document.getElementById('stuName').value        = student?.full_name || '';
+    document.getElementById('stuEmail').value       = student?.email || '';
+    document.getElementById('stuCode').value        = student?.enrollment_code || '';
+    document.getElementById('stuCareer').value      = student?.career || '';
+    document.getElementById('stuSemester').value    = student?.semester || 1;
+    document.getElementById('stuHours').value       = student?.required_hours || 480;
+    document.getElementById('stuStatus').value      = student?.status || 'active';
+    document.getElementById('stuStartDate').value   = student?.start_date || '';
+    document.getElementById('stuEndDate').value     = student?.end_date || '';
+    document.getElementById('stuPassword').value    = '';
+    document.getElementById('passHint').textContent = student ? '(dejar vacío para no cambiar)' : '(requerida)';
+    document.getElementById('studentModalTitle').textContent = student ? 'Editar estudiante' : 'Nuevo estudiante';
+    document.getElementById('studentFormError').classList.add('hidden');
+    openModal('studentModal');
+  }
+
+  async function submitStudentForm(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('studentFormError');
+    errEl.classList.add('hidden');
+    const id = document.getElementById('studentId').value;
+    const payload = {
+      full_name: document.getElementById('stuName').value.trim(),
+      email: document.getElementById('stuEmail').value.trim(),
+      enrollment_code: document.getElementById('stuCode').value.trim(),
+      career: document.getElementById('stuCareer').value.trim(),
+      semester: parseInt(document.getElementById('stuSemester').value),
+      required_hours: parseInt(document.getElementById('stuHours').value),
+      status: document.getElementById('stuStatus').value,
+      start_date: document.getElementById('stuStartDate').value || undefined,
+      end_date: document.getElementById('stuEndDate').value || undefined,
+    };
+    const pass = document.getElementById('stuPassword').value;
+    if (!id && !pass) { errEl.innerHTML = '⚠️ La contraseña es requerida para nuevos estudiantes.'; errEl.classList.remove('hidden'); return; }
+    if (pass) payload.password = pass;
+
+    const btn = document.getElementById('studentSaveBtn');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    const res = id ? await API.put('students/' + id, payload) : await API.post('students', payload);
+    btn.disabled = false; btn.textContent = 'Guardar';
+
+    if (res.error) { errEl.innerHTML = '⚠️ ' + res.error; errEl.classList.remove('hidden'); return; }
+    showToast('Éxito', id ? 'Estudiante actualizado.' : 'Estudiante creado.', 'success');
+    closeModal('studentModal');
+    loadStudents();
+    loadDashboard();
+  }
+
+  function confirmDeleteStudent(id, name) {
+    document.getElementById('confirmMessage').innerHTML = `¿Eliminar al estudiante <strong>${name}</strong>? Esta acción es irreversible y eliminará todos sus datos.`;
+    document.getElementById('confirmBtn').onclick = async () => {
+      const res = await API.delete('students/' + id);
+      if (res.error) { showToast('Error', res.error, 'error'); return; }
+      showToast('Eliminado', 'Estudiante eliminado correctamente.', 'success');
+      closeModal('confirmModal');
+      loadStudents();
+      loadDashboard();
+    };
+    openModal('confirmModal');
+  }
+
+  async function viewStudentDetail(studentId) {
+    document.getElementById('studentDetailBody').innerHTML = '<div style="text-align:center;padding:2rem;"><div class="spinner spinner-lg" style="margin:0 auto;"></div></div>';
+    openModal('studentDetailModal');
+    const [s, hours] = await Promise.all([
+      API.get('students/' + studentId),
+      API.get('hours?student_id=' + studentId),
+    ]);
+    const pct = s.required_hours > 0 ? Math.min(100, (s.completed_hours / s.required_hours) * 100).toFixed(1) : 0;
+    const [cls, lbl] = statusBadge(s.status);
+    document.getElementById('detailModalTitle').textContent = s.full_name;
+    const hoursRows = (Array.isArray(hours) ? hours : []).slice(0, 10).map(h =>
+      `<tr><td>${formatDate(h.service_date)}</td><td>${parseFloat(h.hours)}h</td><td style="font-size:.8125rem;">${h.observation||'—'}</td></tr>`).join('') ||
+      '<tr><td colspan="3" class="table-empty">Sin registros</td></tr>';
+    document.getElementById('studentDetailBody').innerHTML = `
+      <div class="grid-2" style="margin-bottom:1.25rem;">
+        <div><div style="font-size:.75rem;color:var(--text-muted);">Email</div><div style="font-weight:500;">${s.email}</div></div>
+        <div><div style="font-size:.75rem;color:var(--text-muted);">Código</div><div style="font-weight:500;">${s.enrollment_code}</div></div>
+        <div><div style="font-size:.75rem;color:var(--text-muted);">Carrera</div><div style="font-weight:500;">${s.career}</div></div>
+        <div><div style="font-size:.75rem;color:var(--text-muted);">Estado</div><span class="badge ${cls}">${lbl}</span></div>
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <div class="progress-label"><span>${s.completed_hours}h completadas</span><span>de ${s.required_hours}h (${pct}%)</span></div>
+        <div class="progress-wrap"><div class="progress-bar ${pct>=100?'success':''}" style="width:${pct}%;"></div></div>
+      </div>
+      ${s.current_zone ? `<div class="alert alert-info" style="margin-bottom:1rem;font-size:.875rem;">📍 Zona: <strong>${s.current_zone.zone_name}</strong> — ${s.current_zone.supervisor||''}</div>` : ''}
+      <div style="font-weight:600;margin-bottom:.75rem;font-size:.9375rem;">Últimas jornadas</div>
+      <div class="table-wrapper" style="max-height:200px;overflow-y:auto;">
+        <table class="table"><thead><tr><th>Fecha</th><th>Horas</th><th>Obs.</th></tr></thead>
+        <tbody>${hoursRows}</tbody></table>
+      </div>`;
+  }
+
+  // ── Hours ──
+  async function loadHours() {
+    const studentId = document.getElementById('hoursStudentFilter')?.value || '';
+    const from      = document.getElementById('hoursFrom')?.value || '';
+    const to        = document.getElementById('hoursTo')?.value || '';
+    let url = 'hours';
+    const p = [];
+    if (studentId) p.push('student_id=' + studentId);
+    if (from) p.push('from=' + from);
+    if (to)   p.push('to=' + to);
+    if (p.length) url += '?' + p.join('&');
+
+    const res = await API.get(url);
+    const rows = Array.isArray(res) ? res : [];
+    const tbody = document.getElementById('hoursTableBody');
+    tbody.innerHTML = rows.length
+      ? rows.map(h => `<tr>
+          <td><strong>${h.student_name||'—'}</strong><br><span style="font-size:.75rem;color:var(--text-muted);">${h.enrollment_code||''}</span></td>
+          <td>${formatDate(h.service_date)}</td>
+          <td><span class="badge badge-primary">${parseFloat(h.hours)}h</span></td>
+          <td style="max-width:200px;font-size:.8125rem;">${h.observation||'—'}</td>
+          <td style="font-size:.8125rem;">${h.admin_name||'—'}</td>
+          <td style="font-size:.75rem;color:var(--text-muted);">${formatDateTime(h.created_at)}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-secondary btn-sm" onclick="openHoursModal(${JSON.stringify(h).replace(/"/g,'&quot;')})">✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteHours(${h.id})">🗑</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="7" class="table-empty">Sin registros de horas</td></tr>';
+
+    const total = rows.reduce((a, h) => a + parseFloat(h.hours || 0), 0);
+    const lbl = document.getElementById('hoursTotalLabel');
+    if (lbl) lbl.innerHTML = `Total: <span style="color:var(--primary)">${total.toFixed(1)}h</span>`;
+  }
+
+  function clearHoursFilter() {
+    ['hoursStudentFilter','hoursFrom','hoursTo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    loadHours();
+  }
+
+  function openHoursModal(h) {
+    document.getElementById('hoursId').value          = h?.id || '';
+    document.getElementById('hoursStudentSel').value  = h?.student_id || '';
+    document.getElementById('hoursDate').value        = h?.service_date || new Date().toISOString().split('T')[0];
+    document.getElementById('hoursAmount').value      = h ? parseFloat(h.hours) : '';
+    document.getElementById('hoursObs').value         = h?.observation || '';
+    document.getElementById('hoursModalTitle').textContent = h ? 'Editar horas' : 'Registrar horas';
+    document.getElementById('hoursFormError').classList.add('hidden');
+    openModal('hoursModal');
+  }
+
+  async function submitHoursForm(e) {
+    e.preventDefault();
+    const id = document.getElementById('hoursId').value;
+    const errEl = document.getElementById('hoursFormError');
+    errEl.classList.add('hidden');
+    const payload = {
+      student_id:   parseInt(document.getElementById('hoursStudentSel').value),
+      service_date: document.getElementById('hoursDate').value,
+      hours:        parseFloat(document.getElementById('hoursAmount').value),
+      observation:  document.getElementById('hoursObs').value.trim(),
+    };
+    if (!payload.student_id || !payload.service_date || !payload.hours) {
+      errEl.innerHTML = '⚠️ Completa todos los campos requeridos.'; errEl.classList.remove('hidden'); return;
+    }
+    const btn = document.getElementById('hoursSaveBtn');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    const res = id ? await API.put('hours/' + id, payload) : await API.post('hours', payload);
+    btn.disabled = false; btn.textContent = 'Guardar';
+    if (res.error) { errEl.innerHTML = '⚠️ ' + res.error; errEl.classList.remove('hidden'); return; }
+    showToast('Éxito', id ? 'Horas actualizadas.' : 'Horas registradas.', 'success');
+    closeModal('hoursModal');
+    loadHours();
+    loadDashboard();
+  }
+
+  function confirmDeleteHours(id) {
+    document.getElementById('confirmMessage').innerHTML = '¿Eliminar este registro de horas?';
+    document.getElementById('confirmBtn').onclick = async () => {
+      const res = await API.delete('hours/' + id);
+      if (res.error) { showToast('Error', res.error, 'error'); return; }
+      showToast('Eliminado', 'Registro eliminado.', 'success');
+      closeModal('confirmModal');
+      loadHours();
+      loadDashboard();
+    };
+    openModal('confirmModal');
+  }
+
+  // ── Zones ──
+  async function loadZones() {
+    const res = await API.get('zones?all=1');
+    allZones = Array.isArray(res) ? res : [];
+    renderZonesGrid();
+    populateZoneSelects();
+  }
+
+  function renderZonesGrid() {
+    const grid = document.getElementById('zonesGrid');
+    if (!grid) return;
+    grid.innerHTML = allZones.length
+      ? allZones.map(z => `
+          <div class="card zone-card">
+            <div class="zone-header">
+              <div class="zone-info">
+                <h4>${z.name}</h4>
+                <p>📍 ${z.address || '—'}</p>
+              </div>
+              <span class="badge ${z.active ? 'badge-success' : 'badge-gray'}">${z.active ? 'Activa' : 'Inactiva'}</span>
+            </div>
+            <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:1rem;">${z.description || ''}</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:.8125rem;color:var(--text-muted);">👤 ${z.supervisor || 'Sin supervisor'}</div>
+              <div class="action-btns">
+                <button class="btn btn-secondary btn-sm" onclick="openZoneModal(${JSON.stringify(z).replace(/"/g,'&quot;')})">✏️ Editar</button>
+              </div>
+            </div>
+          </div>`).join('')
+      : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🗺️</div><div class="empty-title">Sin zonas registradas</div></div>';
+  }
+
+  function openZoneModal(z) {
+    document.getElementById('zoneId').value         = z?.id || '';
+    document.getElementById('zoneName').value       = z?.name || '';
+    document.getElementById('zoneDesc').value       = z?.description || '';
+    document.getElementById('zoneSupervisor').value = z?.supervisor || '';
+    document.getElementById('zoneAddress').value    = z?.address || '';
+    document.getElementById('zoneActive').value     = z?.active !== undefined ? String(z.active) : '1';
+    document.getElementById('zoneModalTitle').textContent = z ? 'Editar zona' : 'Nueva zona';
+    openModal('zoneModal');
+  }
+
+  async function submitZoneForm(e) {
+    e.preventDefault();
+    const id = document.getElementById('zoneId').value;
+    const payload = {
+      name:        document.getElementById('zoneName').value.trim(),
+      description: document.getElementById('zoneDesc').value.trim(),
+      supervisor:  document.getElementById('zoneSupervisor').value.trim(),
+      address:     document.getElementById('zoneAddress').value.trim(),
+      active:      parseInt(document.getElementById('zoneActive').value),
+    };
+    const res = id ? await API.put('zones/' + id, payload) : await API.post('zones', payload);
+    if (res.error) { showToast('Error', res.error, 'error'); return; }
+    showToast('Éxito', id ? 'Zona actualizada.' : 'Zona creada.', 'success');
+    closeModal('zoneModal');
+    loadZones();
+  }
+
+  async function openAssignZoneModal() {
+    populateStudentSelects();
+    populateZoneSelects();
+    document.getElementById('assignNotes').value = '';
+    openModal('assignZoneModal');
+  }
+
+  async function submitAssignZone(e) {
+    e.preventDefault();
+    const payload = {
+      student_id: parseInt(document.getElementById('assignStudentSel').value),
+      zone_id:    parseInt(document.getElementById('assignZoneSel').value),
+      notes:      document.getElementById('assignNotes').value.trim(),
+    };
+    if (!payload.student_id || !payload.zone_id) { showToast('Error', 'Selecciona estudiante y zona.', 'error'); return; }
+    const res = await API.post('zones/assign', payload);
+    if (res.error) { showToast('Error', res.error, 'error'); return; }
+    showToast('Éxito', 'Zona asignada correctamente.', 'success');
+    closeModal('assignZoneModal');
+    loadStudents();
+  }
+
+  // ── Certificates ──
+  async function loadCertificates() {
+    const [reqRes, certRes] = await Promise.all([API.get('certificates/requests'), API.get('certificates')]);
+    const requests = Array.isArray(reqRes) ? reqRes : [];
+    const certs    = Array.isArray(certRes) ? certRes : [];
+
+    // Pending requests
+    const pending = requests.filter(r => r.status === 'pending');
+    const pendingBody = document.getElementById('pendingCertBody');
+    pendingBody.innerHTML = pending.length
+      ? pending.map(r => `<tr>
+          <td><strong>${r.student_name||'—'}</strong></td>
+          <td style="font-size:.8125rem;">${r.enrollment_code||'—'}</td>
+          <td>${parseFloat(r.completed_hours||0)}/${r.required_hours}h</td>
+          <td style="font-size:.8125rem;">${formatDate(r.requested_at)}</td>
+          <td><span class="badge badge-warning">Pendiente</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-success btn-sm" onclick="processCertRequest(${r.id},'approve')">✓ Aprobar</button>
+              <button class="btn btn-danger btn-sm" onclick="processCertRequest(${r.id},'reject')">✕ Rechazar</button>
+              <button class="btn btn-primary btn-sm" onclick="openUploadCertModal(${r.student_id},${r.id})">⬆ Subir</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" class="table-empty">Sin solicitudes pendientes</td></tr>';
+
+    // All requests
+    const allBody = document.getElementById('allCertBody');
+    allBody.innerHTML = requests.length
+      ? requests.map(r => {
+          const [cls, lbl] = { pending:['badge-warning','Pendiente'], approved:['badge-success','Aprobado'], rejected:['badge-danger','Rechazado'] }[r.status] || ['badge-gray', r.status];
+          return `<tr>
+            <td><strong>${r.student_name||'—'}</strong></td>
+            <td style="font-size:.8125rem;">${r.enrollment_code||'—'}</td>
+            <td style="font-size:.8125rem;">${formatDate(r.requested_at)}</td>
+            <td><span class="badge ${cls}">${lbl}</span></td>
+            <td style="font-size:.8125rem;">${r.reviewed_by_name||'—'}</td>
+            <td style="font-size:.8125rem;color:var(--text-muted);">${r.notes||'—'}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="6" class="table-empty">Sin solicitudes</td></tr>';
+
+    // Uploaded certs
+    const uplBody = document.getElementById('uploadedCertBody');
+    uplBody.innerHTML = certs.length
+      ? certs.map(c => `<tr>
+          <td><strong>${c.student_name||'—'}</strong></td>
+          <td style="font-size:.8125rem;">${c.enrollment_code||'—'}</td>
+          <td style="font-size:.8125rem;">${formatDate(c.uploaded_at)}</td>
+          <td style="font-size:.8125rem;">${c.uploaded_by_name||'—'}</td>
+          <td style="font-size:.8125rem;color:var(--text-muted);">${c.notes||'—'}</td>
+          <td>
+            <a href="../${c.file_path}" target="_blank" class="btn btn-primary btn-sm">⬇ Ver</a>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" class="table-empty">Sin certificados</td></tr>';
+  }
+
+  async function processCertRequest(id, action) {
+    const notes = action === 'reject' ? prompt('Motivo del rechazo (opcional):') || '' : '';
+    const res = await API.put('certificates/' + action, { request_id: id, notes });
+    if (res.error) { showToast('Error', res.error, 'error'); return; }
+    showToast('Éxito', action === 'approve' ? 'Solicitud aprobada.' : 'Solicitud rechazada.', 'success');
+    loadCertificates();
+    loadDashboard();
+  }
+
+  function switchCertTab(tab, btn) {
+    document.querySelectorAll('.cert-tab').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('#section-certificates .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('cert-tab-' + tab).classList.remove('hidden');
+    btn.classList.add('active');
+  }
+
+  async function openUploadCertModal(studentId, requestId) {
+    populateStudentSelects();
+    document.getElementById('uploadCertFile').value   = '';
+    document.getElementById('uploadCertNotes').value  = '';
+    document.getElementById('uploadCertError').classList.add('hidden');
+
+    // Populate request selector
+    const reqRes = await API.get('certificates/requests');
+    const requests = Array.isArray(reqRes) ? reqRes.filter(r => r.status === 'pending') : [];
+    const reqSel = document.getElementById('uploadCertRequest');
+    reqSel.innerHTML = '<option value="">Sin solicitud</option>' +
+      requests.map(r => `<option value="${r.id}" ${r.id == requestId ? 'selected':''}>${r.student_name} — Solicitado ${formatDate(r.requested_at)}</option>`).join('');
+
+    if (studentId) document.getElementById('uploadCertStudent').value = studentId;
+    openModal('uploadCertModal');
+  }
+
+  async function submitUploadCert(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('uploadCertError');
+    errEl.classList.add('hidden');
+    const studentId = document.getElementById('uploadCertStudent').value;
+    const requestId = document.getElementById('uploadCertRequest').value;
+    const file      = document.getElementById('uploadCertFile').files[0];
+    const notes     = document.getElementById('uploadCertNotes').value.trim();
+
+    if (!studentId || !file) { errEl.innerHTML = '⚠️ Selecciona estudiante y archivo.'; errEl.classList.remove('hidden'); return; }
+
+    const btn = document.getElementById('uploadCertBtn');
+    btn.disabled = true; btn.textContent = 'Subiendo...';
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const payload = { student_id: studentId, file_base64: ev.target.result, notes };
+      if (requestId) payload.request_id = requestId;
+      const res = await API.post('certificates/upload', payload);
+      btn.disabled = false; btn.textContent = 'Subir certificado';
+      if (res.error) { errEl.innerHTML = '⚠️ ' + res.error; errEl.classList.remove('hidden'); return; }
+      showToast('Éxito', 'Certificado subido correctamente.', 'success');
+      closeModal('uploadCertModal');
+      loadCertificates();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Notifications ──
+  async function loadNotifications() {
+    const res = await API.get('notifications');
+    const items = res.items || [];
+    const unread = res.unread_count || 0;
+
+    const b1 = document.getElementById('topbarNotifBadge');
+    const b2 = document.getElementById('sidebarNotifBadge');
+    if (unread > 0) { b1.textContent = unread > 9 ? '9+' : unread; b1.classList.remove('hidden'); b2.textContent = unread; b2.style.display = 'flex'; }
+    else { b1.classList.add('hidden'); b2.style.display = 'none'; }
+
+    const dropdown = document.getElementById('notifList');
+    dropdown.innerHTML = items.length
+      ? items.slice(0, 5).map(n => renderNotifItem(n)).join('')
+      : '<div class="notif-empty">Sin notificaciones</div>';
+
+    const full = document.getElementById('allNotifList');
+    if (full) {
+      full.innerHTML = items.length
+        ? items.map(n => renderNotifItem(n, true)).join('')
+        : '<div class="notif-empty" style="padding:3rem;">Sin notificaciones</div>';
+    }
+  }
+
+  function renderNotifItem(n, full = false) {
+    const isUnread = !n.read_at;
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead(${n.id},this)">
+      <div class="notif-dot ${isUnread ? '' : 'read'}"></div>
+      <div style="flex:1;">
+        <div class="notif-text">${n.title}</div>
+        <div class="notif-time">${full ? n.message + '<br>' : ''}${formatRelativeTime(n.created_at)}</div>
+      </div>
+    </div>`;
+  }
+
+  async function markRead(id, el) {
+    await API.put('notifications/' + id + '/read', {});
+    el.classList.remove('unread');
+    el.querySelector('.notif-dot').classList.add('read');
+    loadNotifications();
+  }
+
+  async function markAllRead() {
+    await API.put('notifications/read-all', {});
+    showToast('Listo', 'Notificaciones marcadas como leídas.', 'success');
+    loadNotifications();
+  }
+
+  // ── SSE ──
+  function setupSSE() {
+    const token = localStorage.getItem('ss_token');
+    const es = new EventSource('../api/sse?token=' + token);
+    es.addEventListener('stats_updated', e => {
+      const d = JSON.parse(e.data);
+      document.getElementById('st-total').textContent     = d.total_students || '—';
+      document.getElementById('st-active').textContent    = d.active_students || '—';
+      document.getElementById('st-completed').textContent = d.completed_students || '—';
+      document.getElementById('st-pending').textContent   = d.pending_certificates || '—';
+      document.getElementById('st-hours').textContent     = (d.total_hours || 0) + 'h';
+    });
+    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };
+  }
+
+  // ── Helpers ──
+  function populateStudentSelects() {
+    const selects = ['hoursStudentSel','hoursStudentFilter','assignStudentSel','uploadCertStudent'];
+    selects.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const isFilter = id === 'hoursStudentFilter';
+      el.innerHTML = (isFilter ? '<option value="">Todos los estudiantes</option>' : '<option value="">Seleccionar...</option>') +
+        allStudents.map(s => `<option value="${s.student_id}">${s.full_name} (${s.enrollment_code})</option>`).join('');
+    });
+  }
+
+  function populateZoneSelects() {
+    const el = document.getElementById('assignZoneSel');
+    if (!el) return;
+    el.innerHTML = '<option value="">Seleccionar...</option>' +
+      allZones.filter(z => z.active).map(z => `<option value="${z.id}">${z.name}</option>`).join('');
+  }
+
+  function statusBadge(status) {
+    return { active: ['badge-warning','En progreso'], completed: ['badge-success','Completado'], suspended: ['badge-danger','Suspendido'] }[status] || ['badge-gray', status];
+  }
+
+  // ── Navigation ──
+  const sectionTitles = { dashboard:'Dashboard', students:'Estudiantes', hours:'Horas de Servicio', zones:'Zonas', certificates:'Certificados', notifications:'Notificaciones' };
+  function showSection(name) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name)?.classList.remove('hidden');
+    document.getElementById('nav-' + name)?.classList.add('active');
+    document.getElementById('topbarTitle').textContent = sectionTitles[name] || name;
+    closeSidebar();
+    if (name === 'hours')        loadHours();
+    if (name === 'zones')        loadZones();
+    if (name === 'certificates') loadCertificates();
+    if (name === 'notifications') loadNotifications();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+  function toggleNotifDropdown() { document.getElementById('notifDropdown').classList.toggle('open'); }
+  function closeNotifDropdown()  { document.getElementById('notifDropdown').classList.remove('open'); }
+  document.addEventListener('click', e => { if (!document.getElementById('notifWrapper').contains(e.target)) closeNotifDropdown(); });
+
+  function handleLogout() {
+    localStorage.removeItem('ss_token');
+    localStorage.removeItem('ss_role');
+    localStorage.removeItem('ss_user');
+    window.location.href = '../auth/';
+  }
+</script>
+</body>
+</html>

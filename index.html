@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GestorSS — Sistema de Gestión de Servicio Social</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    :root {
+      --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="landing-nav" id="mainNav">
+  <div class="container">
+    <a href="/" class="landing-logo">
+      <div class="landing-logo-mark">SS</div>
+      <span class="landing-logo-text">GestorSS</span>
+    </a>
+    <div class="landing-nav-links">
+      <a href="#features">Características</a>
+      <a href="#benefits">Beneficios</a>
+      <a href="#stats">Estadísticas</a>
+      <a href="#contact">Contacto</a>
+    </div>
+    <div class="landing-nav-cta">
+      <a href="auth/" class="btn btn-white btn-sm">Iniciar sesión</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>🎓</span> Plataforma oficial de gestión académica
+      </div>
+      <h1>Gestiona tu <span class="serif">servicio social</span> con total transparencia</h1>
+      <p>Controla horas, zonas de trabajo y certificados desde un único sistema. Diseñado para estudiantes y administradores universitarios.</p>
+      <div class="hero-actions">
+        <a href="auth/" class="btn btn-white btn-lg">Acceder al sistema</a>
+        <a href="#features" class="btn btn-outline-white btn-lg">Ver características</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;">
+          <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">A</div>
+          <div>
+            <div style="color:#fff;font-weight:600;font-size:.875rem;">Ana García</div>
+            <div style="color:rgba(255,255,255,.6);font-size:.75rem;">Ing. de Sistemas · Sem. 8</div>
+          </div>
+          <div class="badge badge-success" style="margin-left:auto;">Activa</div>
+        </div>
+        <div class="progress-label" style="color:rgba(255,255,255,.7);">
+          <span>Progreso total</span><span>87.5%</span>
+        </div>
+        <div class="progress-wrap" style="background:rgba(255,255,255,.2);margin-bottom:1.25rem;">
+          <div class="progress-bar success" style="width:87.5%;background:#4ade80;"></div>
+        </div>
+        <div class="hero-stat-row">
+          <div class="hero-stat"><div class="hero-stat-num">420</div><div class="hero-stat-lbl">Horas completadas</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">60</div><div class="hero-stat-lbl">Horas restantes</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">480</div><div class="hero-stat-lbl">Total requeridas</div></div>
+        </div>
+        <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.15);">
+          <div style="display:flex;align-items:center;gap:.5rem;color:rgba(255,255,255,.8);font-size:.8125rem;">
+            <span>📍</span> Biblioteca Municipal · Lcda. María Torres
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="section section-gray" id="features">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:3rem;">
+      <div class="section-label">Características</div>
+      <h2 class="section-title">Todo lo que necesitas en un solo lugar</h2>
+      <p class="section-subtitle">Una plataforma completa para gestionar el proceso de servicio social universitario de inicio a fin.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">⏱️</div>
+        <h3 class="feature-title">Control de horas</h3>
+        <p class="feature-desc">Registro preciso de cada jornada de servicio con fecha, observaciones y seguimiento en tiempo real del progreso acumulado.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">🗺️</div>
+        <h3 class="feature-title">Gestión de zonas</h3>
+        <p class="feature-desc">Asignación dinámica de centros de servicio. Historial completo de cambios de zona con información del supervisor responsable.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">📜</div>
+        <h3 class="feature-title">Certificados digitales</h3>
+        <p class="feature-desc">Solicitud y descarga de certificados de cumplimiento directamente desde el panel. Flujo de aprobación transparente.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">🔔</div>
+        <h3 class="feature-title">Notificaciones</h3>
+        <p class="feature-desc">Alertas automáticas al registrar horas, asignar zonas o aprobar certificados. Mantente siempre informado.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Panel administrativo</h3>
+        <p class="feature-desc">Dashboard con estadísticas en tiempo real: estudiantes activos, horas registradas y solicitudes de certificado pendientes.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Acceso seguro</h3>
+        <p class="feature-desc">Autenticación JWT con roles diferenciados. Cada usuario accede únicamente a su información y funciones correspondientes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="section section-dark" id="stats">
+  <div class="container text-center">
+    <div class="section-label" style="color:#93c5fd;">Impacto real</div>
+    <h2 class="section-title" style="color:#fff;margin-bottom:.75rem;">Números que hablan por sí solos</h2>
+    <p style="color:rgba(255,255,255,.6);margin-bottom:3rem;">El sistema está diseñado para escalar con tu institución desde el primer día.</p>
+    <div class="stats-grid reveal">
+      <div class="landing-stat">
+        <div class="landing-stat-num" data-count="480">0</div>
+        <div class="landing-stat-lbl">Horas de servicio requeridas</div>
+      </div>
+      <div class="landing-stat">
+        <div class="landing-stat-num" data-count="4">0</div>
+        <div class="landing-stat-lbl">Zonas de servicio disponibles</div>
+      </div>
+      <div class="landing-stat">
+        <div class="landing-stat-num" data-count="100">0</div>
+        <div class="landing-stat-lbl">% de trazabilidad del proceso</div>
+      </div>
+      <div class="landing-stat">
+        <div class="landing-stat-num" data-count="24">0</div>
+        <div class="landing-stat-lbl">Horas máx. por jornada</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BENEFITS ── -->
+<section class="section" id="benefits">
+  <div class="container">
+    <div class="benefits-grid">
+      <div>
+        <div class="section-label">Beneficios</div>
+        <h2 class="section-title">¿Por qué usar GestorSS?</h2>
+        <p style="margin-bottom:2rem;">Elimina el papeleo, reduce errores y ofrece visibilidad total sobre el progreso de cada estudiante.</p>
+        <div class="benefit-item reveal">
+          <div class="benefit-check">✓</div>
+          <div>
+            <div class="benefit-title">Seguimiento en tiempo real</div>
+            <div class="benefit-desc">Tanto estudiantes como administradores ven el progreso actualizado al instante mediante Server-Sent Events.</div>
+          </div>
+        </div>
+        <div class="benefit-item reveal reveal-delay-1">
+          <div class="benefit-check">✓</div>
+          <div>
+            <div class="benefit-title">Historial completo</div>
+            <div class="benefit-desc">Cada registro de horas, cambio de zona y acción administrativa queda guardado con auditoría completa.</div>
+          </div>
+        </div>
+        <div class="benefit-item reveal reveal-delay-2">
+          <div class="benefit-check">✓</div>
+          <div>
+            <div class="benefit-title">Proceso de certificación transparente</div>
+            <div class="benefit-desc">El estudiante solicita, el administrador revisa y aprueba, y el certificado queda disponible para descarga inmediata.</div>
+          </div>
+        </div>
+        <div class="benefit-item reveal reveal-delay-3">
+          <div class="benefit-check">✓</div>
+          <div>
+            <div class="benefit-title">Roles y permisos claros</div>
+            <div class="benefit-desc">Estudiantes solo ven su información. Administradores gestionan todo el sistema con controles completos.</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="display:flex;align-items:center;justify-content:center;">
+        <div style="background:linear-gradient(135deg,#eff6ff,#f5f3ff);border-radius:1.5rem;padding:2.5rem;width:100%;max-width:400px;">
+          <h4 style="margin-bottom:1.5rem;color:var(--text-primary);">Estado del sistema</h4>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="stat-card" style="box-shadow:none;border:none;background:#fff;padding:1rem;">
+              <div class="stat-icon blue">👥</div>
+              <div><div class="stat-value" id="lp-students">—</div><div class="stat-label">Estudiantes registrados</div></div>
+            </div>
+            <div class="stat-card" style="box-shadow:none;border:none;background:#fff;padding:1rem;">
+              <div class="stat-icon green">✅</div>
+              <div><div class="stat-value" id="lp-completed">—</div><div class="stat-label">Han completado horas</div></div>
+            </div>
+            <div class="stat-card" style="box-shadow:none;border:none;background:#fff;padding:1rem;">
+              <div class="stat-icon yellow">⏳</div>
+              <div><div class="stat-value" id="lp-pending">—</div><div class="stat-label">Certificados pendientes</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section section-gray">
+  <div class="container text-center">
+    <div class="section-label">Proceso</div>
+    <h2 class="section-title">¿Cómo funciona?</h2>
+    <p class="section-subtitle">Cuatro pasos simples para completar tu servicio social sin complicaciones.</p>
+    <div class="grid-4" style="margin-top:2rem;text-align:left;">
+      <div class="card" style="padding:1.75rem;text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.25rem;margin:0 auto 1rem;">1</div>
+        <h4 style="margin-bottom:.5rem;">Registro</h4>
+        <p style="font-size:.875rem;">Crea tu cuenta con tu código de matrícula y carrera universitaria.</p>
+      </div>
+      <div class="card" style="padding:1.75rem;text-align:center;">
+        <div style="width:48px;height:48px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.25rem;margin:0 auto 1rem;">2</div>
+        <h4 style="margin-bottom:.5rem;">Asignación de zona</h4>
+        <p style="font-size:.875rem;">El administrador te asigna a un centro de servicio con su supervisor.</p>
+      </div>
+      <div class="card" style="padding:1.75rem;text-align:center;">
+        <div style="width:48px;height:48px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.25rem;margin:0 auto 1rem;">3</div>
+        <h4 style="margin-bottom:.5rem;">Acumula horas</h4>
+        <p style="font-size:.875rem;">El administrador registra tus jornadas. Tú ves el progreso en tiempo real.</p>
+      </div>
+      <div class="card" style="padding:1.75rem;text-align:center;">
+        <div style="width:48px;height:48px;background:var(--warning);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.25rem;margin:0 auto 1rem;">4</div>
+        <h4 style="margin-bottom:.5rem;">Certificado</h4>
+        <p style="font-size:.875rem;">Al completar las horas, solicita tu certificado y descárgalo en PDF.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div>
+        <div class="section-label">Contacto</div>
+        <h2 class="section-title">¿Tienes preguntas?</h2>
+        <p style="margin-bottom:2rem;">Nuestro equipo de soporte está disponible para ayudarte con cualquier inquietud sobre el proceso de servicio social.</p>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="stat-icon blue" style="width:44px;height:44px;border-radius:.75rem;">📧</div>
+            <div>
+              <div style="font-weight:600;font-size:.9375rem;">Correo electrónico</div>
+              <div style="color:var(--text-muted);font-size:.875rem;">soporte@universidad.edu.co</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="stat-icon green" style="width:44px;height:44px;border-radius:.75rem;">📍</div>
+            <div>
+              <div style="font-weight:600;font-size:.9375rem;">Oficina de Bienestar</div>
+              <div style="color:var(--text-muted);font-size:.875rem;">Bloque A, Piso 2 — Lunes a Viernes 8am–5pm</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="stat-icon yellow" style="width:44px;height:44px;border-radius:.75rem;">📞</div>
+            <div>
+              <div style="font-weight:600;font-size:.9375rem;">Línea de atención</div>
+              <div style="color:var(--text-muted);font-size:.875rem;">+57 (6) 123 4567 ext. 201</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3 style="margin-bottom:1.5rem;font-size:1.25rem;">Envíanos un mensaje</h3>
+        <form id="contactForm" onsubmit="handleContact(event)">
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" class="form-control" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" placeholder="correo@ejemplo.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asunto</label>
+            <select class="form-control">
+              <option>Problema con mi cuenta</option>
+              <option>Consulta sobre horas</option>
+              <option>Solicitud de certificado</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mensaje</label>
+            <textarea class="form-control" rows="4" placeholder="Describe tu consulta..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-full">Enviar mensaje</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="landing-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="landing-logo" style="margin-bottom:.75rem;">
+          <div class="landing-logo-mark">SS</div>
+          <span style="color:#fff;font-weight:700;font-size:1.125rem;">GestorSS</span>
+        </div>
+        <p>Sistema integral de gestión de horas de servicio social universitario. Transparencia y eficiencia en cada paso del proceso.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="auth/">Iniciar sesión</a></li>
+          <li><a href="auth/#register">Registrarse</a></li>
+          <li><a href="#features">Características</a></li>
+          <li><a href="#benefits">Beneficios</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="#contact">Contacto</a></li>
+          <li><a href="#contact">Preguntas frecuentes</a></li>
+          <li><a href="mailto:soporte@universidad.edu.co">Soporte técnico</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 GestorSS — Universidad. Todos los derechos reservados.</p>
+      <p>Desarrollado para la gestión académica de servicio social</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Overlay sidebar mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="assets/js/app.js"></script>
+<script>
+  // Scroll nav
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Reveal on scroll
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // Counter animation
+  function animateCount(el, target) {
+    let start = 0;
+    const step = Math.ceil(target / 60);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      el.textContent = start + (el.dataset.count === '100' ? '%' : '+');
+      if (start >= target) clearInterval(timer);
+    }, 24);
+  }
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        animateCount(el, parseInt(el.dataset.count));
+        countObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+
+  // Contact form
+  function handleContact(e) {
+    e.preventDefault();
+    showToast('Mensaje enviado', 'Nos pondremos en contacto contigo pronto.', 'success');
+    e.target.reset();
+  }
+
+  // Load live stats from API
+  (async () => {
+    try {
+      const token = localStorage.getItem('ss_token');
+      if (!token) return;
+      const res = await fetch('api/students', { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) return;
+      const data = await res.json();
+      const students = Array.isArray(data) ? data : [];
+      document.getElementById('lp-students').textContent = students.length;
+      document.getElementById('lp-completed').textContent = students.filter(s => s.status === 'completed').length;
+      // certificate requests
+      const cr = await fetch('api/certificates/requests', { headers: { Authorization: 'Bearer ' + token } });
+      if (cr.ok) {
+        const crData = await cr.json();
+        document.getElementById('lp-pending').textContent = (Array.isArray(crData) ? crData : []).filter(r => r.status === 'pending').length;
+      }
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>

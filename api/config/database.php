@@ -1,8 +1,8 @@
 <?php
-define('DB_HOST',      getenv('DB_HOST')      ?: 'localhost');
-define('DB_NAME',      getenv('DB_NAME')      ?: 'servicio_social');
-define('DB_USER',      getenv('DB_USER')      ?: 'root');
-define('DB_PASS',      getenv('DB_PASS')      ?: '');
+define('DB_HOST',      getenv('DB_HOST')      ?: 'sql208.infinityfree.com');
+define('DB_NAME',      getenv('DB_NAME')      ?: 'if0_41867189_gestor');
+define('DB_USER',      getenv('DB_USER')      ?: 'if0_41867189');
+define('DB_PASS',      getenv('DB_PASS')      ?: 'jbaRKTM4s8U');
 define('JWT_SECRET',   getenv('JWT_SECRET')   ?: 'servicio_social_jwt_secret_2024_xZ7#kQ');
 define('UPLOAD_PATH',  __DIR__ . '/../../uploads/certificates/');
 define('BASE_URL',     getenv('BASE_URL')     ?: 'http://localhost:8080');

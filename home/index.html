@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Servicio Social — GestorSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    :root { --font: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .app-layout { display:flex; min-height:100vh; }
+    .progress-ring { position:relative; display:inline-flex; align-items:center; justify-content:center; }
+    .progress-ring svg { transform:rotate(-90deg); }
+    .progress-ring-label { position:absolute; text-align:center; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: slideUp .4s ease both; }
+    .fade-in-2 { animation: slideUp .4s ease .1s both; }
+    .fade-in-3 { animation: slideUp .4s ease .2s both; }
+    .hours-table th { white-space: nowrap; }
+    .sidebar-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;display:none; }
+    .sidebar-overlay.active { display:block; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div style="text-align:center;">
+    <div class="spinner spinner-lg" style="margin:0 auto 1rem;"></div>
+    <div style="color:var(--text-secondary);font-size:.875rem;">Cargando tu perfil...</div>
+  </div>
+</div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">SS</div>
+      <span class="sidebar-brand-name">GestorSS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <ul>
+        <li class="nav-item active" id="nav-dashboard">
+          <a href="#" onclick="showSection('dashboard');return false;">
+            <span class="nav-icon">📊</span> Mi Dashboard
+          </a>
+        </li>
+        <li class="nav-item" id="nav-hours">
+          <a href="#" onclick="showSection('hours');return false;">
+            <span class="nav-icon">⏱️</span> Mis Horas
+          </a>
+        </li>
+        <li class="nav-item" id="nav-zone">
+          <a href="#" onclick="showSection('zone');return false;">
+            <span class="nav-icon">🗺️</span> Mi Zona
+          </a>
+        </li>
+        <li class="nav-item" id="nav-certificate">
+          <a href="#" onclick="showSection('certificate');return false;">
+            <span class="nav-icon">📜</span> Certificado
+          </a>
+        </li>
+        <div class="nav-section-label" style="margin-top:.75rem;">Cuenta</div>
+        <li class="nav-item" id="nav-notifications">
+          <a href="#" onclick="showSection('notifications');return false;">
+            <span class="nav-icon">🔔</span> Notificaciones
+            <span class="notif-badge" id="sidebarNotifBadge" style="position:relative;top:auto;right:auto;margin-left:auto;display:none;"></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <button onclick="handleLogout()">
+            <span class="nav-icon">🚪</span> Cerrar sesión
+          </button>
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Cargando...</div>
+          <div class="sidebar-user-role">Estudiante</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topbarTitle">Mi Dashboard</span>
+      <div class="topbar-actions">
+        <!-- Notification Bell -->
+        <div class="relative" id="notifWrapper">
+          <button class="notif-btn" id="notifBtn" onclick="toggleNotifDropdown()">
+            🔔
+            <span class="notif-badge hidden" id="topbarNotifBadge">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:.9375rem;">Notificaciones</span>
+              <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Marcar como leídas</button>
+            </div>
+            <div class="notif-list" id="notifList">
+              <div class="notif-empty">Cargando notificaciones...</div>
+            </div>
+            <div class="notif-footer">
+              <a href="#" class="text-sm text-primary" onclick="showSection('notifications');closeNotifDropdown();return false;">Ver todas</a>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div class="avatar" id="topbarAvatar">?</div>
+          <span style="font-size:.875rem;font-weight:500;" id="topbarName">—</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- ═══════════════ DASHBOARD ═══════════════ -->
+      <div id="section-dashboard" class="section-content">
+        <div class="page-header fade-in">
+          <h1 class="page-title">Mi Dashboard</h1>
+          <p class="page-subtitle">Resumen de tu progreso de servicio social</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid-4 fade-in-2" id="dashStats" style="margin-bottom:1.5rem;">
+          <div class="stat-card">
+            <div class="stat-icon blue">📋</div>
+            <div><div class="stat-value" id="statRequired">—</div><div class="stat-label">Horas requeridas</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div><div class="stat-value" id="statCompleted">—</div><div class="stat-label">Horas completadas</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow">⏳</div>
+            <div><div class="stat-value" id="statRemaining">—</div><div class="stat-label">Horas restantes</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">🎯</div>
+            <div><div class="stat-value" id="statPct">—</div><div class="stat-label">Progreso</div></div>
+          </div>
+        </div>
+
+        <!-- Progress + Zone -->
+        <div class="grid-2 fade-in-3" style="margin-bottom:1.5rem;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Progreso de horas</span>
+              <span class="badge" id="dashStatusBadge">—</span>
+            </div>
+            <div class="card-body">
+              <div class="progress-label">
+                <span id="progressLabelLeft">0 completadas</span>
+                <span id="progressLabelRight">de 0 horas</span>
+              </div>
+              <div class="progress-wrap progress-lg">
+                <div class="progress-bar" id="progressBar" style="width:0%;"></div>
+              </div>
+              <div style="margin-top:1.5rem;">
+                <div style="font-size:.875rem;color:var(--text-secondary);">Período de servicio</div>
+                <div style="margin-top:.5rem;display:flex;gap:2rem;">
+                  <div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">Inicio</div>
+                    <div style="font-weight:600;" id="dashStartDate">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">Fin previsto</div>
+                    <div style="font-weight:600;" id="dashEndDate">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:.75rem;color:var(--text-muted);">Carrera</div>
+                    <div style="font-weight:600;" id="dashCareer">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Zona asignada</span>
+            </div>
+            <div class="card-body" id="dashZoneBody">
+              <div class="empty-state" style="padding:1rem;">
+                <div class="empty-icon">🗺️</div>
+                <div class="empty-desc">Sin zona asignada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent hours -->
+        <div class="card fade-in-3">
+          <div class="card-header">
+            <span class="card-title">Últimas jornadas registradas</span>
+            <a href="#" class="btn btn-ghost btn-sm" onclick="showSection('hours');return false;">Ver todas →</a>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrapper" style="box-shadow:none;border:none;border-radius:0;">
+              <table class="table" id="dashRecentTable">
+                <thead><tr>
+                  <th>Fecha</th><th>Horas</th><th>Observación</th>
+                </tr></thead>
+                <tbody id="dashRecentBody">
+                  <tr><td colspan="3" class="table-empty">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ HOURS ═══════════════ -->
+      <div id="section-hours" class="section-content hidden">
+        <div class="page-header">
+          <h1 class="page-title">Mis Horas</h1>
+          <p class="page-subtitle">Registro completo de todas tus jornadas de servicio</p>
+        </div>
+
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-body" style="padding:1rem;">
+            <div class="filter-bar">
+              <input type="date" id="hoursFrom" class="form-control" style="max-width:160px;" placeholder="Desde" />
+              <input type="date" id="hoursTo"   class="form-control" style="max-width:160px;" placeholder="Hasta" />
+              <button class="btn btn-primary" onclick="loadStudentHours()">Filtrar</button>
+              <button class="btn btn-secondary" onclick="clearHoursFilter()">Limpiar</button>
+              <div style="margin-left:auto;font-weight:600;" id="hoursTotalLabel"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="table hours-table">
+            <thead><tr>
+              <th>#</th><th>Fecha</th><th>Horas</th><th>Observación</th><th>Registrado por</th><th>Fecha registro</th>
+            </tr></thead>
+            <tbody id="hoursTableBody">
+              <tr><td colspan="6" class="table-empty">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ ZONE ═══════════════ -->
+      <div id="section-zone" class="section-content hidden">
+        <div class="page-header">
+          <h1 class="page-title">Mi Zona de Servicio</h1>
+          <p class="page-subtitle">Información de tu centro de servicio social y supervisor</p>
+        </div>
+        <div id="zoneContent">
+          <div class="empty-state">
+            <div class="empty-icon">🗺️</div>
+            <div class="empty-title">Sin zona asignada</div>
+            <div class="empty-desc">El administrador aún no te ha asignado a un centro de servicio. Recibirás una notificación cuando esto ocurra.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ CERTIFICATE ═══════════════ -->
+      <div id="section-certificate" class="section-content hidden">
+        <div class="page-header">
+          <h1 class="page-title">Certificado</h1>
+          <p class="page-subtitle">Solicita y descarga tu certificado de servicio social</p>
+        </div>
+        <div id="certContent">
+          <div class="empty-state"><div class="spinner spinner-lg" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ NOTIFICATIONS ═══════════════ -->
+      <div id="section-notifications" class="section-content hidden">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h1 class="page-title">Notificaciones</h1>
+            <p class="page-subtitle">Todas tus alertas y avisos del sistema</p>
+          </div>
+          <button class="btn btn-secondary" onclick="markAllRead()">✓ Marcar todas como leídas</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;" id="allNotifList">
+            <div class="notif-empty">Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+  // ── State ──
+  let studentProfile = null;
+  let currentSection = 'dashboard';
+
+  // ── Init ──
+  (async function init() {
+    if (!requireStudentAuth()) return;
+    const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+    setUserUI(user);
+    await loadProfile();
+    document.getElementById('loadingOverlay').style.display = 'none';
+    setupSSE();
+    loadNotifications();
+  })();
+
+  function requireStudentAuth() {
+    const token = localStorage.getItem('ss_token');
+    const role  = localStorage.getItem('ss_role');
+    if (!token) { window.location.href = '../auth/'; return false; }
+    if (role === 'admin') { window.location.href = '../admin/'; return false; }
+    return true;
+  }
+
+  function setUserUI(user) {
+    const initial = (user.full_name || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = initial;
+    document.getElementById('topbarAvatar').textContent  = initial;
+    document.getElementById('sidebarName').textContent   = user.full_name || '—';
+    document.getElementById('topbarName').textContent    = (user.full_name || '').split(' ')[0] || '—';
+  }
+
+  // ── Profile ──
+  async function loadProfile() {
+    const res = await API.get('students/me');
+    if (res.error) { showToast('Error', res.error, 'error'); return; }
+    studentProfile = res;
+    renderDashboard(res);
+    loadStudentHours();
+    loadZone(res.student_id);
+    loadCertificate(res);
+  }
+
+  function renderDashboard(s) {
+    const completed = parseFloat(s.completed_hours || 0);
+    const required  = parseInt(s.required_hours || 480);
+    const remaining = Math.max(0, required - completed);
+    const pct       = required > 0 ? Math.min(100, ((completed / required) * 100)).toFixed(1) : 0;
+
+    document.getElementById('statRequired').textContent  = required;
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statRemaining').textContent = remaining;
+    document.getElementById('statPct').textContent       = pct + '%';
+
+    document.getElementById('progressLabelLeft').textContent  = completed + ' completadas';
+    document.getElementById('progressLabelRight').textContent = 'de ' + required + ' horas';
+
+    const bar = document.getElementById('progressBar');
+    setTimeout(() => { bar.style.width = pct + '%'; }, 100);
+    bar.className = 'progress-bar ' + (pct >= 100 ? 'success' : pct >= 60 ? '' : pct >= 30 ? 'warning' : 'danger');
+
+    const statusMap = { active: ['badge-warning','En progreso'], completed: ['badge-success','Completado'], suspended: ['badge-danger','Suspendido'] };
+    const [cls, label] = statusMap[s.status] || ['badge-gray', s.status];
+    const badge = document.getElementById('dashStatusBadge');
+    badge.className = 'badge ' + cls;
+    badge.textContent = label;
+
+    document.getElementById('dashStartDate').textContent = s.start_date ? formatDate(s.start_date) : '—';
+    document.getElementById('dashEndDate').textContent   = s.end_date   ? formatDate(s.end_date)   : 'Pendiente';
+    document.getElementById('dashCareer').textContent    = s.career || '—';
+
+    // Update sidebar user info
+    document.getElementById('sidebarName').textContent = s.full_name || '—';
+    const initial = (s.full_name || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebarAvatar').textContent = initial;
+    document.getElementById('topbarAvatar').textContent  = initial;
+    document.getElementById('topbarName').textContent    = (s.full_name || '').split(' ')[0];
+  }
+
+  // ── Hours ──
+  async function loadStudentHours() {
+    const from = document.getElementById('hoursFrom')?.value;
+    const to   = document.getElementById('hoursTo')?.value;
+    let url = 'hours';
+    const params = [];
+    if (from) params.push('from=' + from);
+    if (to)   params.push('to=' + to);
+    if (params.length) url += '?' + params.join('&');
+
+    const res = await API.get(url);
+    const rows = Array.isArray(res) ? res : [];
+
+    // Dashboard recent (last 5)
+    const recentBody = document.getElementById('dashRecentBody');
+    if (recentBody) {
+      const recent = rows.slice(0, 5);
+      recentBody.innerHTML = recent.length
+        ? recent.map(h => `<tr>
+            <td>${formatDate(h.service_date)}</td>
+            <td><strong>${parseFloat(h.hours)}h</strong></td>
+            <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h.observation || '—'}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="3" class="table-empty">Sin registros de horas</td></tr>';
+    }
+
+    // Full table
+    const body = document.getElementById('hoursTableBody');
+    if (body) {
+      body.innerHTML = rows.length
+        ? rows.map((h, i) => `<tr>
+            <td style="color:var(--text-muted);font-size:.8125rem;">${i + 1}</td>
+            <td>${formatDate(h.service_date)}</td>
+            <td><span class="badge badge-primary">${parseFloat(h.hours)}h</span></td>
+            <td style="max-width:240px;">${h.observation || '—'}</td>
+            <td>${h.admin_name || '—'}</td>
+            <td style="font-size:.8125rem;color:var(--text-muted);">${formatDateTime(h.created_at)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="6" class="table-empty">Sin registros de horas</td></tr>';
+
+      const total = rows.reduce((acc, h) => acc + parseFloat(h.hours || 0), 0);
+      const lbl = document.getElementById('hoursTotalLabel');
+      if (lbl) lbl.innerHTML = `Total: <span style="color:var(--primary)">${total}h</span>`;
+    }
+  }
+
+  function clearHoursFilter() {
+    document.getElementById('hoursFrom').value = '';
+    document.getElementById('hoursTo').value   = '';
+    loadStudentHours();
+  }
+
+  // ── Zone ──
+  async function loadZone(studentId) {
+    const res = await API.get('students/' + studentId);
+    const zone = res?.current_zone;
+
+    // Dashboard zone card
+    const dashZone = document.getElementById('dashZoneBody');
+    if (dashZone) {
+      if (zone) {
+        dashZone.innerHTML = `
+          <div class="zone-header" style="margin-bottom:.75rem;">
+            <div class="zone-info">
+              <h4 style="color:var(--text-primary);margin-bottom:.25rem;">${zone.zone_name}</h4>
+              <p style="font-size:.8125rem;color:var(--text-secondary);">${zone.description || ''}</p>
+            </div>
+            <span class="badge badge-success">Activa</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div style="display:flex;gap:.5rem;align-items:center;font-size:.875rem;color:var(--text-secondary);">
+              👤 <strong>Supervisor:</strong>&nbsp;${zone.supervisor || '—'}
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;font-size:.875rem;color:var(--text-secondary);">
+              📍 <strong>Dirección:</strong>&nbsp;${zone.address || '—'}
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;font-size:.875rem;color:var(--text-secondary);">
+              📅 <strong>Asignado:</strong>&nbsp;${formatDate(zone.assigned_at)}
+            </div>
+          </div>`;
+      } else {
+        dashZone.innerHTML = `<div class="empty-state" style="padding:1rem;"><div class="empty-icon">🗺️</div><div class="empty-desc">Sin zona asignada</div></div>`;
+      }
+    }
+
+    // Zone section
+    const zoneContent = document.getElementById('zoneContent');
+    if (zoneContent) {
+      if (zone) {
+        zoneContent.innerHTML = `
+          <div class="grid-2" style="margin-bottom:1.5rem;">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Centro de servicio</span><span class="badge badge-success">Zona activa</span></div>
+              <div class="card-body">
+                <h3 style="margin-bottom:.75rem;">${zone.zone_name}</h3>
+                <p style="margin-bottom:1.25rem;">${zone.description || 'Sin descripción disponible.'}</p>
+                <div style="display:flex;flex-direction:column;gap:.75rem;">
+                  <div class="stat-card" style="padding:.875rem;border:none;background:var(--bg);">
+                    <div class="stat-icon blue" style="width:36px;height:36px;font-size:1rem;">👤</div>
+                    <div><div style="font-weight:600;font-size:.875rem;">${zone.supervisor || '—'}</div><div class="stat-label">Supervisor responsable</div></div>
+                  </div>
+                  <div class="stat-card" style="padding:.875rem;border:none;background:var(--bg);">
+                    <div class="stat-icon green" style="width:36px;height:36px;font-size:1rem;">📍</div>
+                    <div><div style="font-weight:600;font-size:.875rem;">${zone.address || '—'}</div><div class="stat-label">Dirección</div></div>
+                  </div>
+                  <div class="stat-card" style="padding:.875rem;border:none;background:var(--bg);">
+                    <div class="stat-icon yellow" style="width:36px;height:36px;font-size:1rem;">📅</div>
+                    <div><div style="font-weight:600;font-size:.875rem;">${formatDate(zone.assigned_at)}</div><div class="stat-label">Fecha de asignación</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Mapa de ubicación</span></div>
+              <div class="card-body">
+                <div style="background:var(--bg);border-radius:var(--radius-md);height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;">
+                  <div style="font-size:2.5rem;">📍</div>
+                  <div style="font-weight:600;color:var(--text-primary);">${zone.zone_name}</div>
+                  <div style="font-size:.875rem;color:var(--text-muted);">${zone.address || ''}</div>
+                </div>
+                ${zone.notes ? `<div class="alert alert-info" style="margin-top:1rem;font-size:.875rem;">${zone.notes}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      } else {
+        zoneContent.innerHTML = `
+          <div class="empty-state" style="padding:4rem 1rem;">
+            <div class="empty-icon">🗺️</div>
+            <div class="empty-title">Sin zona asignada</div>
+            <div class="empty-desc">El administrador aún no te ha asignado a un centro de servicio social.<br>Recibirás una notificación cuando esto ocurra.</div>
+          </div>`;
+      }
+    }
+  }
+
+  // ── Certificate ──
+  async function loadCertificate(profile) {
+    const certContent = document.getElementById('certContent');
+    if (!certContent) return;
+
+    const completed  = parseFloat(profile.completed_hours || 0);
+    const required   = parseInt(profile.required_hours || 480);
+    const isComplete = completed >= required;
+    const pct        = required > 0 ? Math.min(100, (completed / required) * 100).toFixed(1) : 0;
+
+    // Load requests & certs in parallel
+    const [reqRes, certRes] = await Promise.all([
+      API.get('certificates/requests'),
+      API.get('certificates'),
+    ]);
+    const requests = Array.isArray(reqRes) ? reqRes : [];
+    const certs    = Array.isArray(certRes) ? certRes : [];
+
+    const hasCert       = certs.length > 0;
+    const pendingReq    = requests.find(r => r.status === 'pending');
+    const approvedReq   = requests.find(r => r.status === 'approved');
+
+    let html = '';
+
+    if (hasCert) {
+      html = `
+        <div class="grid-2">
+          <div class="cert-card available">
+            <div class="cert-icon">🎓</div>
+            <h3 style="color:var(--success);margin-bottom:.5rem;">¡Certificado disponible!</h3>
+            <p style="font-size:.875rem;margin-bottom:1.5rem;">Tu certificado de servicio social ha sido emitido y está listo para descargar.</p>
+            <a href="../${certs[0].file_path}" target="_blank" class="btn btn-success btn-lg">⬇ Descargar certificado</a>
+            <div style="margin-top:1rem;font-size:.8125rem;color:var(--text-secondary);">
+              Emitido el ${formatDate(certs[0].uploaded_at)}
+              ${certs[0].notes ? ` · ${certs[0].notes}` : ''}
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Historial de solicitudes</span></div>
+            <div class="card-body" style="padding:0;">
+              ${renderRequestsTable(requests)}
+            </div>
+          </div>
+        </div>`;
+    } else if (!isComplete) {
+      html = `
+        <div class="cert-card" style="max-width:520px;margin:0 auto;">
+          <div class="cert-icon">📋</div>
+          <h3 style="margin-bottom:.5rem;">Completa tus horas primero</h3>
+          <p style="font-size:.875rem;margin-bottom:1.5rem;">Necesitas completar las horas requeridas para solicitar el certificado.</p>
+          <div class="progress-wrap" style="margin-bottom:.5rem;">
+            <div class="progress-bar warning" style="width:${pct}%;"></div>
+          </div>
+          <div style="font-size:.875rem;color:var(--text-secondary);">${completed} de ${required} horas (${pct}%)</div>
+          <div style="margin-top:1.5rem;font-size:.875rem;color:var(--text-muted);">
+            Te faltan <strong>${required - completed} horas</strong> para poder solicitar el certificado.
+          </div>
+        </div>`;
+    } else if (pendingReq) {
+      html = `
+        <div class="grid-2">
+          <div class="cert-card pending">
+            <div class="cert-icon">⏳</div>
+            <h3 style="color:var(--warning);margin-bottom:.5rem;">Solicitud en revisión</h3>
+            <p style="font-size:.875rem;margin-bottom:1rem;">Tu solicitud fue recibida y está siendo revisada por el administrador.</p>
+            <div class="badge badge-warning" style="font-size:.8125rem;">Solicitado el ${formatDate(pendingReq.requested_at)}</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Historial de solicitudes</span></div>
+            <div class="card-body" style="padding:0;">${renderRequestsTable(requests)}</div>
+          </div>
+        </div>`;
+    } else {
+      html = `
+        <div class="grid-2">
+          <div class="cert-card" style="border-color:var(--success);background:var(--success-light);">
+            <div class="cert-icon">🎉</div>
+            <h3 style="margin-bottom:.5rem;">¡Horas completadas!</h3>
+            <p style="font-size:.875rem;margin-bottom:1.5rem;">Has completado las ${required} horas requeridas. Ya puedes solicitar tu certificado.</p>
+            <button class="btn btn-success btn-lg" onclick="requestCertificate()">📜 Solicitar certificado</button>
+            <div style="margin-top:.875rem;font-size:.8125rem;color:var(--text-secondary);">Solo puedes tener una solicitud pendiente a la vez.</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Historial de solicitudes</span></div>
+            <div class="card-body" style="padding:0;">${renderRequestsTable(requests)}</div>
+          </div>
+        </div>`;
+    }
+
+    certContent.innerHTML = html;
+  }
+
+  function renderRequestsTable(requests) {
+    if (!requests.length) return '<div class="notif-empty">Sin solicitudes previas</div>';
+    const statusMap = { pending:['badge-warning','Pendiente'], approved:['badge-success','Aprobado'], rejected:['badge-danger','Rechazado'] };
+    return `<table class="table"><thead><tr><th>Fecha</th><th>Estado</th><th>Notas</th></tr></thead><tbody>
+      ${requests.map(r => {
+        const [cls, lbl] = statusMap[r.status] || ['badge-gray', r.status];
+        return `<tr><td>${formatDate(r.requested_at)}</td><td><span class="badge ${cls}">${lbl}</span></td><td style="font-size:.8125rem;color:var(--text-muted);">${r.notes || '—'}</td></tr>`;
+      }).join('')}
+    </tbody></table>`;
+  }
+
+  async function requestCertificate() {
+    const res = await API.post('certificates/request', {});
+    if (res.error) { showToast('Error', res.error, 'error'); return; }
+    showToast('Solicitud enviada', 'Tu solicitud de certificado fue enviada correctamente.', 'success');
+    loadCertificate(studentProfile);
+  }
+
+  // ── Notifications ──
+  async function loadNotifications() {
+    const res = await API.get('notifications');
+    const items = res.items || [];
+    const unread = res.unread_count || 0;
+
+    // Badge
+    const badge1 = document.getElementById('topbarNotifBadge');
+    const badge2 = document.getElementById('sidebarNotifBadge');
+    if (unread > 0) {
+      badge1.textContent = unread > 9 ? '9+' : unread;
+      badge1.classList.remove('hidden');
+      badge2.textContent = unread;
+      badge2.style.display = 'flex';
+    } else {
+      badge1.classList.add('hidden');
+      badge2.style.display = 'none';
+    }
+
+    // Dropdown list (last 5)
+    const dropdown = document.getElementById('notifList');
+    dropdown.innerHTML = items.length
+      ? items.slice(0, 5).map(n => renderNotifItem(n)).join('')
+      : '<div class="notif-empty">Sin notificaciones</div>';
+
+    // Full list
+    const full = document.getElementById('allNotifList');
+    if (full) {
+      full.innerHTML = items.length
+        ? items.map(n => renderNotifItem(n, true)).join('')
+        : '<div class="notif-empty" style="padding:3rem;">Sin notificaciones</div>';
+    }
+  }
+
+  function renderNotifItem(n, full = false) {
+    const isUnread = !n.read_at;
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead(${n.id}, this)">
+      <div class="notif-dot ${isUnread ? '' : 'read'}"></div>
+      <div style="flex:1;">
+        <div class="notif-text">${n.title}</div>
+        <div class="notif-time">${full ? n.message + '<br>' : ''}${formatRelativeTime(n.created_at)}</div>
+      </div>
+    </div>`;
+  }
+
+  async function markRead(id, el) {
+    await API.put('notifications/' + id + '/read', {});
+    el.classList.remove('unread');
+    el.querySelector('.notif-dot').classList.add('read');
+    loadNotifications();
+  }
+
+  async function markAllRead() {
+    await API.put('notifications/read-all', {});
+    showToast('Listo', 'Todas las notificaciones marcadas como leídas.', 'success');
+    loadNotifications();
+  }
+
+  // ── SSE ──
+  function setupSSE() {
+    const token = localStorage.getItem('ss_token');
+    const es = new EventSource('../api/sse?token=' + token);
+    es.addEventListener('student_stats', e => {
+      const data = JSON.parse(e.data);
+      if (studentProfile) {
+        studentProfile.completed_hours = data.completed_hours;
+        studentProfile.remaining_hours = data.remaining_hours;
+        studentProfile.completion_pct  = data.completion_pct;
+        studentProfile.status          = data.status;
+        renderDashboard({ ...studentProfile, ...data });
+      }
+    });
+    es.addEventListener('unread_notifications', e => {
+      const { count } = JSON.parse(e.data);
+      const b1 = document.getElementById('topbarNotifBadge');
+      const b2 = document.getElementById('sidebarNotifBadge');
+      if (count > 0) { b1.textContent = count; b1.classList.remove('hidden'); b2.textContent = count; b2.style.display = 'flex'; }
+      else { b1.classList.add('hidden'); b2.style.display = 'none'; }
+    });
+    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };
+  }
+
+  // ── Navigation ──
+  const sectionTitles = { dashboard: 'Mi Dashboard', hours: 'Mis Horas', zone: 'Mi Zona', certificate: 'Certificado', notifications: 'Notificaciones' };
+  function showSection(name) {
+    document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name)?.classList.remove('hidden');
+    document.getElementById('nav-' + name)?.classList.add('active');
+    document.getElementById('topbarTitle').textContent = sectionTitles[name] || name;
+    currentSection = name;
+    closeSidebar();
+    if (name === 'notifications') loadNotifications();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+
+  // Notification dropdown
+  function toggleNotifDropdown() {
+    document.getElementById('notifDropdown').classList.toggle('open');
+  }
+  function closeNotifDropdown() {
+    document.getElementById('notifDropdown').classList.remove('open');
+  }
+  document.addEventListener('click', e => {
+    const wrapper = document.getElementById('notifWrapper');
+    if (!wrapper.contains(e.target)) closeNotifDropdown();
+  });
+
+  function handleLogout() {
+    localStorage.removeItem('ss_token');
+    localStorage.removeItem('ss_role');
+    localStorage.removeItem('ss_user');
+    window.location.href = '../auth/';
+  }
+</script>
+</body>
+</html>
