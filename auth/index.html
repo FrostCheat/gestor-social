@@ -9,16 +9,21 @@
   <link rel="stylesheet" href="../assets/css/styles.css" />
   <style>
     :root { --font: 'Plus Jakarta Sans', system-ui, sans-serif; }
-    .auth-form-content { animation: fadeIn .3s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    .strength-bar { height:4px; border-radius:4px; background:var(--border); margin-top:.375rem; overflow:hidden; }
-    .strength-fill { height:100%; border-radius:4px; width:0; transition:width .3s,background .3s; }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; animation: fadeUp .25s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .strength-bar  { height: 4px; border-radius: 4px; background: var(--border); margin-top: .375rem; overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 4px; width: 0; transition: width .3s, background .3s; }
+    .btn-tab { flex: 1; padding: .5rem; text-align: center; border-radius: var(--radius-sm);
+               font-size: .875rem; font-weight: 500; color: var(--text-muted);
+               transition: var(--transition); border: none; background: transparent; cursor: pointer; }
+    .btn-tab.active { background: var(--bg-white); color: var(--primary); box-shadow: var(--shadow-sm); }
   </style>
 </head>
 <body>
 <div class="auth-page">
 
-  <!-- LEFT PANEL -->
+  <!-- ══ PANEL IZQUIERDO ══ -->
   <div class="auth-left">
     <div class="auth-left-content">
       <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;justify-content:center;">
@@ -28,180 +33,131 @@
       <h2>Tu servicio social, siempre organizado</h2>
       <p>Accede a tu perfil, revisa tu progreso y descarga tu certificado cuando completes las horas requeridas.</p>
       <div class="auth-features">
-        <div class="auth-feature">
-          <div class="auth-feature-icon">⏱️</div>
-          <span>Seguimiento de horas en tiempo real</span>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">🗺️</div>
-          <span>Información de tu zona y supervisor</span>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">📜</div>
-          <span>Solicitud y descarga de certificado</span>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">🔔</div>
-          <span>Notificaciones de avances y novedades</span>
-        </div>
+        <div class="auth-feature"><div class="auth-feature-icon">⏱️</div><span>Seguimiento de horas en tiempo real</span></div>
+        <div class="auth-feature"><div class="auth-feature-icon">🗺️</div><span>Información de tu zona y supervisor</span></div>
+        <div class="auth-feature"><div class="auth-feature-icon">📜</div><span>Solicitud y descarga de certificado</span></div>
+        <div class="auth-feature"><div class="auth-feature-icon">🔔</div><span>Notificaciones de avances y novedades</span></div>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
+  <!-- ══ PANEL DERECHO ══ -->
   <div class="auth-right">
     <div class="auth-box">
-      <!-- Logo mobile -->
-      <div class="auth-logo" style="display:none;" id="mobileLogo">
-        <div class="auth-logo-mark">SS</div>
-        <div>
-          <div style="font-weight:700;font-size:1rem;">GestorSS</div>
-          <div style="font-size:.75rem;color:var(--text-muted);">Sistema de Servicio Social</div>
-        </div>
-      </div>
 
       <!-- Tabs -->
-      <div class="auth-tabs" id="authTabs">
-        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
-        <button class="auth-tab" data-tab="register">Registrarse</button>
+      <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-md);padding:.25rem;margin-bottom:1.75rem;background:var(--bg);" id="tabBar">
+        <button class="btn-tab active" id="tab-login"    onclick="showPanel('login')">Iniciar sesión</button>
+        <button class="btn-tab"        id="tab-register" onclick="showPanel('register')">Registrarse</button>
       </div>
 
-      <!-- ── LOGIN ── -->
-      <div class="auth-form active" id="form-login">
-        <div class="auth-form-content">
-          <h2 class="auth-title">Bienvenido de nuevo</h2>
-          <p class="auth-subtitle">Ingresa tus credenciales para continuar</p>
-          <div style="margin:1.25rem 0;"></div>
+      <!-- ══ LOGIN ══ -->
+      <div class="auth-panel active" id="panel-login">
+        <h2 class="auth-title">Bienvenido de nuevo</h2>
+        <p class="auth-subtitle" style="margin-bottom:1.5rem;">Ingresa tus credenciales para continuar</p>
 
-          <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
-            <div class="form-group">
-              <label class="form-label">Correo electrónico</label>
-              <input type="email" id="loginEmail" class="form-control" placeholder="correo@ejemplo.com" autocomplete="email" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Contraseña</label>
-              <div class="password-toggle">
-                <input type="password" id="loginPassword" class="form-control" placeholder="Tu contraseña" autocomplete="current-password" required />
-                <button type="button" class="password-eye" onclick="togglePass('loginPassword',this)">👁️</button>
-              </div>
-            </div>
-            <div style="text-align:right;margin-top:-.5rem;margin-bottom:1rem;">
-              <a href="#" class="btn-link text-sm" onclick="showForgot();return false;">¿Olvidaste tu contraseña?</a>
-            </div>
-            <button type="submit" class="btn btn-primary w-full btn-lg" id="loginBtn">
-              <span id="loginBtnText">Iniciar sesión</span>
-              <span id="loginSpinner" class="spinner hidden"></span>
-            </button>
-          </form>
-
-          <div id="loginError" class="alert alert-danger hidden" style="margin-top:1rem;"></div>
-
-          <div class="auth-divider">o</div>
-          <div class="auth-switch">
-            ¿No tienes cuenta? <a href="#" onclick="switchTab('register');return false;">Regístrate gratis</a>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="l-email" class="form-control" placeholder="correo@ejemplo.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <div class="password-toggle">
+            <input type="password" id="l-pass" class="form-control" placeholder="Tu contraseña" autocomplete="current-password" />
+            <button type="button" class="password-eye" onclick="togglePass('l-pass',this)">👁️</button>
           </div>
+        </div>
+        <div style="text-align:right;margin-top:-.5rem;margin-bottom:1rem;">
+          <button type="button" class="btn-link text-sm" onclick="showPanel('forgot')">¿Olvidaste tu contraseña?</button>
+        </div>
 
-          <div class="alert alert-info" style="margin-top:1.25rem;font-size:.8125rem;">
-            <span>ℹ️</span>
-            <div><strong>Admin demo:</strong> admin@universidad.edu.co / admin123</div>
-          </div>
+        <button class="btn btn-primary w-full btn-lg" id="btn-login" onclick="handleLogin()">
+          Iniciar sesión
+        </button>
+
+        <div id="login-error" class="alert alert-danger hidden" style="margin-top:1rem;"></div>
+
+        <div class="auth-divider">o</div>
+        <div class="auth-switch">¿No tienes cuenta? <button type="button" class="btn-link" onclick="showPanel('register')">Regístrate gratis</button></div>
+
+        <div class="alert alert-info" style="margin-top:1.25rem;font-size:.8125rem;">
+          <span>ℹ️</span>
+          <div><strong>Admin demo:</strong> admin@universidad.edu.co / admin123</div>
         </div>
       </div>
 
-      <!-- ── REGISTER ── -->
-      <div class="auth-form" id="form-register">
-        <div class="auth-form-content">
-          <h2 class="auth-title">Crear cuenta</h2>
-          <p class="auth-subtitle">Completa el formulario para registrarte como estudiante</p>
-          <div style="margin:1.25rem 0;"></div>
+      <!-- ══ REGISTER ══ -->
+      <div class="auth-panel" id="panel-register">
+        <h2 class="auth-title">Crear cuenta</h2>
+        <p class="auth-subtitle" style="margin-bottom:1.5rem;">Completa el formulario para registrarte como estudiante</p>
 
-          <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label">Nombre completo *</label>
-                <input type="text" id="regName" class="form-control" placeholder="Ej: Juan Pérez García" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Código de matrícula *</label>
-                <input type="text" id="regCode" class="form-control" placeholder="Ej: 2024001" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Correo electrónico *</label>
-              <input type="email" id="regEmail" class="form-control" placeholder="correo@ejemplo.com" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Carrera *</label>
-              <input type="text" id="regCareer" class="form-control" placeholder="Ej: Ingeniería de Sistemas" required />
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label">Semestre</label>
-                <select id="regSemester" class="form-control">
-                  <option value="1">Semestre 1</option><option value="2">Semestre 2</option>
-                  <option value="3">Semestre 3</option><option value="4">Semestre 4</option>
-                  <option value="5">Semestre 5</option><option value="6">Semestre 6</option>
-                  <option value="7">Semestre 7</option><option value="8">Semestre 8</option>
-                  <option value="9">Semestre 9</option><option value="10">Semestre 10</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Horas requeridas</label>
-                <input type="number" id="regHours" class="form-control" value="480" min="1" max="9999" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Contraseña *</label>
-              <div class="password-toggle">
-                <input type="password" id="regPassword" class="form-control" placeholder="Mínimo 6 caracteres" oninput="checkStrength(this)" required />
-                <button type="button" class="password-eye" onclick="togglePass('regPassword',this)">👁️</button>
-              </div>
-              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-              <div class="form-hint" id="strengthText"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Confirmar contraseña *</label>
-              <div class="password-toggle">
-                <input type="password" id="regPassword2" class="form-control" placeholder="Repite tu contraseña" required />
-                <button type="button" class="password-eye" onclick="togglePass('regPassword2',this)">👁️</button>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary w-full btn-lg" id="regBtn">
-              <span id="regBtnText">Crear cuenta</span>
-              <span id="regSpinner" class="spinner hidden"></span>
-            </button>
-          </form>
-
-          <div id="regError" class="alert alert-danger hidden" style="margin-top:1rem;"></div>
-
-          <div class="auth-switch" style="margin-top:1rem;">
-            ¿Ya tienes cuenta? <a href="#" onclick="switchTab('login');return false;">Inicia sesión</a>
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input type="text" id="r-name" class="form-control" placeholder="Ej: Juan Pérez García" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grado / Carrera *</label>
+          <input type="text" id="r-career" class="form-control" placeholder="Ej: Ingeniería de Sistemas" />
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Correo electrónico *</label>
+            <input type="email" id="r-email" class="form-control" placeholder="correo@ejemplo.com" autocomplete="email" />
           </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono *</label>
+            <input type="tel" id="r-phone" class="form-control" placeholder="Ej: 3001234567" autocomplete="tel" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña *</label>
+          <div class="password-toggle">
+            <input type="password" id="r-pass" class="form-control" placeholder="Mínimo 6 caracteres" oninput="checkStrength(this)" />
+            <button type="button" class="password-eye" onclick="togglePass('r-pass',this)">👁️</button>
+          </div>
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="form-hint" id="strengthText"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar contraseña *</label>
+          <div class="password-toggle">
+            <input type="password" id="r-pass2" class="form-control" placeholder="Repite tu contraseña" />
+            <button type="button" class="password-eye" onclick="togglePass('r-pass2',this)">👁️</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="margin-bottom:1rem;font-size:.8125rem;">
+          <span>ℹ️</span><div>Se asignarán <strong>80 horas</strong> requeridas por defecto. El código de matrícula se generará automáticamente.</div>
+        </div>
+
+        <button class="btn btn-primary w-full btn-lg" id="btn-register" onclick="handleRegister()">
+          Crear cuenta
+        </button>
+
+        <div id="register-error" class="alert alert-danger hidden" style="margin-top:1rem;"></div>
+
+        <div class="auth-switch" style="margin-top:1rem;">
+          ¿Ya tienes cuenta? <button type="button" class="btn-link" onclick="showPanel('login')">Inicia sesión</button>
         </div>
       </div>
 
-      <!-- ── FORGOT PASSWORD ── -->
-      <div class="auth-form" id="form-forgot">
-        <div class="auth-form-content">
-          <button class="btn btn-ghost btn-sm" onclick="showLogin()" style="margin-bottom:1rem;">← Volver</button>
-          <h2 class="auth-title">Recuperar contraseña</h2>
-          <p class="auth-subtitle">Te enviaremos instrucciones a tu correo electrónico</p>
-          <div style="margin:1.25rem 0;"></div>
+      <!-- ══ FORGOT ══ -->
+      <div class="auth-panel" id="panel-forgot">
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-bottom:1rem;" onclick="showPanel('login')">← Volver</button>
+        <h2 class="auth-title">Recuperar contraseña</h2>
+        <p class="auth-subtitle" style="margin-bottom:1.5rem;">Te enviaremos instrucciones a tu correo electrónico</p>
 
-          <form id="forgotForm" onsubmit="handleForgot(event)" novalidate>
-            <div class="form-group">
-              <label class="form-label">Correo electrónico</label>
-              <input type="email" id="forgotEmail" class="form-control" placeholder="correo@ejemplo.com" required />
-            </div>
-            <button type="submit" class="btn btn-primary w-full btn-lg" id="forgotBtn">
-              <span id="forgotBtnText">Enviar instrucciones</span>
-              <span id="forgotSpinner" class="spinner hidden"></span>
-            </button>
-          </form>
-
-          <div id="forgotSuccess" class="alert alert-success hidden" style="margin-top:1rem;"></div>
-          <div id="forgotError" class="alert alert-danger hidden" style="margin-top:1rem;"></div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="f-email" class="form-control" placeholder="correo@ejemplo.com" />
         </div>
+
+        <button class="btn btn-primary w-full btn-lg" id="btn-forgot" onclick="handleForgot()">
+          Enviar instrucciones
+        </button>
+
+        <div id="forgot-success" class="alert alert-success hidden" style="margin-top:1rem;"></div>
+        <div id="forgot-error"   class="alert alert-danger  hidden" style="margin-top:1rem;"></div>
       </div>
 
     </div><!-- /auth-box -->
@@ -209,179 +165,168 @@
 </div><!-- /auth-page -->
 
 <div class="toast-container" id="toastContainer"></div>
-
 <script src="../assets/js/app.js"></script>
 <script>
-  // Redirect if already logged in
-  (function() {
-    const token = localStorage.getItem('ss_token');
-    const role  = localStorage.getItem('ss_role');
-    if (token) {
-      window.location.href = role === 'admin' ? '../admin/' : '../home/';
-    }
-    // Show mobile logo on small screens
-    if (window.innerWidth <= 768) {
-      document.getElementById('mobileLogo').style.display = 'flex';
-    }
-  })();
+/* ── Redirect si ya está autenticado ── */
+(function () {
+  const token = localStorage.getItem('ss_token');
+  const role  = localStorage.getItem('ss_role');
+  if (token) {
+    window.location.replace(role === 'admin' ? '../admin/' : '../home/');
+  }
+})();
 
-  // Check for hash to open register tab
-  if (window.location.hash === '#register') switchTab('register');
-
-  // Tab switching
-  document.querySelectorAll('.auth-tab').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+/* ── Cambio de panel ── */
+function showPanel(name) {
+  // Ocultar todos los paneles
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  // Mostrar el pedido
+  var panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+  // Actualizar tabs (solo login/register tienen tab)
+  document.getElementById('tab-login')?.classList.toggle('active', name === 'login');
+  document.getElementById('tab-register')?.classList.toggle('active', name === 'register');
+  // Ocultar tabs si estamos en forgot
+  document.getElementById('tabBar').style.display = name === 'forgot' ? 'none' : '';
+  // Limpiar errores
+  ['login-error','register-error','forgot-error','forgot-success'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.add('hidden'); el.innerHTML = ''; }
   });
+}
 
-  function switchTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    document.getElementById('form-' + tab)?.classList.add('active');
-    document.getElementById('authTabs').style.display = '';
+/* ── Toggle contraseña ── */
+function togglePass(id, btn) {
+  var input = document.getElementById(id);
+  var isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  btn.textContent = isText ? '👁️' : '🙈';
+}
+
+/* ── Fortaleza contraseña ── */
+function checkStrength(input) {
+  var v = input.value;
+  var score = 0;
+  if (v.length >= 6)  score++;
+  if (v.length >= 10) score++;
+  if (/[A-Z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  var fill = document.getElementById('strengthFill');
+  var text = document.getElementById('strengthText');
+  var levels = [
+    { w:'20%', bg:'#dc2626', label:'Muy débil' },
+    { w:'40%', bg:'#f97316', label:'Débil' },
+    { w:'60%', bg:'#eab308', label:'Regular' },
+    { w:'80%', bg:'#22c55e', label:'Buena' },
+    { w:'100%',bg:'#16a34a', label:'Muy fuerte' },
+  ];
+  var lvl = levels[Math.min(score - 1, 4)];
+  fill.style.width      = score > 0 ? lvl.w  : '0';
+  fill.style.background = score > 0 ? lvl.bg : '';
+  text.textContent      = score > 0 ? lvl.label : '';
+}
+
+/* ── Helpers UI ── */
+function setErr(id, msg) {
+  var el = document.getElementById(id);
+  el.innerHTML = '⚠️ ' + msg;
+  el.classList.remove('hidden');
+}
+function setBtnLoading(id, loading, defaultText) {
+  var btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Procesando...' : defaultText;
+}
+
+/* ── Generar código de matrícula ── */
+function genCode() {
+  return 'EST-' + Date.now().toString(36).toUpperCase().slice(-6);
+}
+
+/* ── LOGIN ── */
+async function handleLogin() {
+  var email = document.getElementById('l-email').value.trim();
+  var pass  = document.getElementById('l-pass').value;
+  if (!email || !pass) { setErr('login-error', 'Completa todos los campos.'); return; }
+  setBtnLoading('btn-login', true, 'Iniciar sesión');
+  var res = await API.login(email, pass);
+  setBtnLoading('btn-login', false, 'Iniciar sesión');
+  if (res.error) { setErr('login-error', res.error); return; }
+  localStorage.setItem('ss_token', res.token);
+  localStorage.setItem('ss_role',  res.user.role);
+  localStorage.setItem('ss_user',  JSON.stringify(res.user));
+  showToast('Bienvenido', res.user.full_name, 'success');
+  setTimeout(function() {
+    window.location.replace(res.user.role === 'admin' ? '../admin/' : '../home/');
+  }, 600);
+}
+
+/* ── REGISTER ── */
+async function handleRegister() {
+  var name   = document.getElementById('r-name').value.trim();
+  var career = document.getElementById('r-career').value.trim();
+  var email  = document.getElementById('r-email').value.trim();
+  var phone  = document.getElementById('r-phone').value.trim();
+  var pass   = document.getElementById('r-pass').value;
+  var pass2  = document.getElementById('r-pass2').value;
+
+  if (!name || !career || !email || !phone || !pass) {
+    setErr('register-error', 'Todos los campos son obligatorios.'); return;
+  }
+  if (pass !== pass2) {
+    setErr('register-error', 'Las contraseñas no coinciden.'); return;
+  }
+  if (pass.length < 6) {
+    setErr('register-error', 'La contraseña debe tener mínimo 6 caracteres.'); return;
+  }
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    setErr('register-error', 'Ingresa un correo válido.'); return;
   }
 
-  function showForgot() {
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    document.getElementById('form-forgot').classList.add('active');
-    document.getElementById('authTabs').style.display = 'none';
-  }
+  setBtnLoading('btn-register', true, 'Crear cuenta');
+  var res = await API.register({
+    full_name:       name,
+    career:          career,
+    email:           email,
+    enrollment_code: genCode(),
+    required_hours:  80,
+    semester:        1,
+    password:        pass,
+  });
+  setBtnLoading('btn-register', false, 'Crear cuenta');
 
-  function showLogin() {
-    document.getElementById('authTabs').style.display = '';
-    switchTab('login');
-  }
+  if (res.error) { setErr('register-error', res.error); return; }
+  localStorage.setItem('ss_token', res.token);
+  localStorage.setItem('ss_role',  res.user.role);
+  localStorage.setItem('ss_user',  JSON.stringify(res.user));
+  showToast('Cuenta creada', '¡Bienvenido, ' + res.user.full_name + '!', 'success');
+  setTimeout(function() { window.location.replace('../home/'); }, 700);
+}
 
-  // Password visibility toggle
-  function togglePass(id, btn) {
-    const input = document.getElementById(id);
-    const isText = input.type === 'text';
-    input.type = isText ? 'password' : 'text';
-    btn.textContent = isText ? '👁️' : '🙈';
-  }
+/* ── FORGOT ── */
+async function handleForgot() {
+  var email = document.getElementById('f-email').value.trim();
+  if (!email) { setErr('forgot-error', 'Ingresa tu correo electrónico.'); return; }
+  setBtnLoading('btn-forgot', true, 'Enviar instrucciones');
+  var res = await API.forgotPassword(email);
+  setBtnLoading('btn-forgot', false, 'Enviar instrucciones');
+  if (res.error) { setErr('forgot-error', res.error); return; }
+  var suc = document.getElementById('forgot-success');
+  suc.innerHTML = '✅ ' + (res.message || 'Si el correo existe, recibirás las instrucciones.');
+  suc.classList.remove('hidden');
+}
 
-  // Password strength
-  function checkStrength(input) {
-    const v = input.value;
-    let score = 0;
-    if (v.length >= 6)  score++;
-    if (v.length >= 10) score++;
-    if (/[A-Z]/.test(v)) score++;
-    if (/[0-9]/.test(v)) score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-    const fill = document.getElementById('strengthFill');
-    const text = document.getElementById('strengthText');
-    const levels = [
-      { w: '20%', bg: '#dc2626', label: 'Muy débil' },
-      { w: '40%', bg: '#f97316', label: 'Débil' },
-      { w: '60%', bg: '#eab308', label: 'Regular' },
-      { w: '80%', bg: '#22c55e', label: 'Buena' },
-      { w: '100%', bg: '#16a34a', label: 'Muy fuerte' },
-    ];
-    const lvl = levels[Math.min(score - 1, 4)] || levels[0];
-    fill.style.width = score > 0 ? lvl.w : '0';
-    fill.style.background = lvl.bg;
-    text.textContent = score > 0 ? lvl.label : '';
-  }
-
-  // LOGIN
-  async function handleLogin(e) {
-    e.preventDefault();
-    const email    = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const errEl    = document.getElementById('loginError');
-    errEl.classList.add('hidden');
-
-    if (!email || !password) { showFieldError(errEl, 'Completa todos los campos.'); return; }
-
-    setLoading('login', true);
-    const result = await API.login(email, password);
-    setLoading('login', false);
-
-    if (result.error) {
-      showFieldError(errEl, result.error);
-    } else {
-      const { token, user } = result;
-      localStorage.setItem('ss_token', token);
-      localStorage.setItem('ss_role',  user.role);
-      localStorage.setItem('ss_user',  JSON.stringify(user));
-      showToast('Bienvenido', `Hola, ${user.full_name}`, 'success');
-      setTimeout(() => {
-        window.location.href = user.role === 'admin' ? '../admin/' : '../home/';
-      }, 600);
-    }
-  }
-
-  // REGISTER
-  async function handleRegister(e) {
-    e.preventDefault();
-    const errEl = document.getElementById('regError');
-    errEl.classList.add('hidden');
-
-    const name     = document.getElementById('regName').value.trim();
-    const code     = document.getElementById('regCode').value.trim();
-    const email    = document.getElementById('regEmail').value.trim();
-    const career   = document.getElementById('regCareer').value.trim();
-    const semester = parseInt(document.getElementById('regSemester').value);
-    const hours    = parseInt(document.getElementById('regHours').value) || 480;
-    const pass     = document.getElementById('regPassword').value;
-    const pass2    = document.getElementById('regPassword2').value;
-
-    if (!name || !code || !email || !career || !pass) { showFieldError(errEl, 'Todos los campos marcados con * son obligatorios.'); return; }
-    if (pass !== pass2) { showFieldError(errEl, 'Las contraseñas no coinciden.'); return; }
-    if (pass.length < 6) { showFieldError(errEl, 'La contraseña debe tener mínimo 6 caracteres.'); return; }
-
-    setLoading('reg', true);
-    const result = await API.register({ full_name: name, enrollment_code: code, email, career, semester, required_hours: hours, password: pass });
-    setLoading('reg', false);
-
-    if (result.error) {
-      showFieldError(errEl, result.error);
-    } else {
-      const { token, user } = result;
-      localStorage.setItem('ss_token', token);
-      localStorage.setItem('ss_role',  user.role);
-      localStorage.setItem('ss_user',  JSON.stringify(user));
-      showToast('Cuenta creada', 'Bienvenido al sistema.', 'success');
-      setTimeout(() => { window.location.href = '../home/'; }, 600);
-    }
-  }
-
-  // FORGOT PASSWORD
-  async function handleForgot(e) {
-    e.preventDefault();
-    const email   = document.getElementById('forgotEmail').value.trim();
-    const errEl   = document.getElementById('forgotError');
-    const sucEl   = document.getElementById('forgotSuccess');
-    errEl.classList.add('hidden');
-    sucEl.classList.add('hidden');
-
-    if (!email) { showFieldError(errEl, 'Ingresa tu correo electrónico.'); return; }
-
-    setLoading('forgot', true);
-    const result = await API.forgotPassword(email);
-    setLoading('forgot', false);
-
-    if (result.error) {
-      showFieldError(errEl, result.error);
-    } else {
-      sucEl.innerHTML = '✅ ' + (result.message || 'Si el correo existe, recibirás las instrucciones.');
-      sucEl.classList.remove('hidden');
-    }
-  }
-
-  function showFieldError(el, msg) {
-    el.innerHTML = '⚠️ ' + msg;
-    el.classList.remove('hidden');
-  }
-
-  function setLoading(form, loading) {
-    const btn  = document.getElementById(form + 'Btn');
-    const text = document.getElementById(form + 'BtnText');
-    const spin = document.getElementById(form + 'Spinner');
-    btn.disabled = loading;
-    text.textContent = loading ? 'Procesando...' : (form === 'login' ? 'Iniciar sesión' : form === 'reg' ? 'Crear cuenta' : 'Enviar instrucciones');
-    spin.classList.toggle('hidden', !loading);
-  }
+/* ── Enter en campos ── */
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  var active = document.querySelector('.auth-panel.active');
+  if (!active) return;
+  var id = active.id;
+  if (id === 'panel-login')    handleLogin();
+  if (id === 'panel-register') handleRegister();
+  if (id === 'panel-forgot')   handleForgot();
+});
 </script>
 </body>
 </html>

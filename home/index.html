@@ -684,7 +684,7 @@
 
   // ── SSE ──
   function setupSSE() {
-    const token = localStorage.getItem('ss_token');
+   /* const token = localStorage.getItem('ss_token');
     const es = new EventSource('../api/sse?token=' + token);
     es.addEventListener('student_stats', e => {
       const data = JSON.parse(e.data);
@@ -703,7 +703,7 @@
       if (count > 0) { b1.textContent = count; b1.classList.remove('hidden'); b2.textContent = count; b2.style.display = 'flex'; }
       else { b1.classList.add('hidden'); b2.style.display = 'none'; }
     });
-    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };
+    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };*/
   }
 
   // ── Navigation ──

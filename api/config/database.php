@@ -1,6 +1,6 @@
 <?php
 define('DB_HOST',      getenv('DB_HOST')      ?: 'sql208.infinityfree.com');
-define('DB_NAME',      getenv('DB_NAME')      ?: 'if0_41867189_gestor');
+define('DB_NAME',      getenv('DB_NAME')      ?: 'if0_41867189_gestor_social');
 define('DB_USER',      getenv('DB_USER')      ?: 'if0_41867189');
 define('DB_PASS',      getenv('DB_PASS')      ?: 'jbaRKTM4s8U');
 define('JWT_SECRET',   getenv('JWT_SECRET')   ?: 'servicio_social_jwt_secret_2024_xZ7#kQ');

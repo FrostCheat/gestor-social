@@ -21,10 +21,9 @@
    ================================================================ */
 
 const CONFIG = {
-  API_BASE: '../../api',
+  API_BASE: '/api',
   TOKEN_KEY: 'ss_token',
   USER_KEY: 'ss_user',
-  SSE_RECONNECT_DELAY: 3000,
 };
 
 /* ================================================================
@@ -296,7 +295,7 @@ const Modal = (() => {
    ================================================================ */
 
 const SSEManager = (() => {
-  let source = null;
+  /*let source = null;
   let reconnectTimer = null;
   const handlers = {};
 
@@ -353,7 +352,7 @@ const SSEManager = (() => {
     if (source) { source.close(); source = null; }
   }
 
-  return { connect, disconnect, on, off };
+  return { connect, disconnect, on, off };*/
 })();
 
 /* ================================================================
@@ -493,7 +492,7 @@ const NotifDropdown = (() => {
       document.getElementById('notif-dropdown')?.classList.remove('open');
     });
 
-    SSEManager.on('unread_notifications', ({ count }) => setCount(count));
+    //SSEManager.on('unread_notifications', ({ count }) => setCount(count));
   }
 
   async function load() {
@@ -682,13 +681,13 @@ const HomeView = (() => {
     initSidebar();
     loadUser();
     initNavigation();
-    SSEManager.connect();
+    /*SSEManager.connect();
     SSEManager.on('student_stats', updateStats);
     SSEManager.on('hours_added',   () => { loadHours(); loadProfile(); });
     SSEManager.on('zone_assigned', () => loadProfile());
     SSEManager.on('certificate_uploaded', () => loadCertificates());
     SSEManager.on('student_completed', () => { Toast.success('¡Felicitaciones!', 'Has completado tus horas de servicio social.'); loadProfile(); });
-
+*/
     const notifContainer = document.getElementById('notif-container');
     if (notifContainer) NotifDropdown.render(notifContainer);
   }
@@ -964,7 +963,7 @@ const AdminView = (() => {
     const notifContainer = document.getElementById('notif-container');
     if (notifContainer) NotifDropdown.render(notifContainer);
 
-    SSEManager.connect();
+    /*SSEManager.connect();
     SSEManager.on('stats_updated', updateDashboardStats);
     SSEManager.on('certificate_requested', () => {
       Toast.info('Nueva solicitud de certificado');
@@ -973,7 +972,7 @@ const AdminView = (() => {
     SSEManager.on('student_completed', ({ student_id }) => {
       Toast.success('Estudiante completó horas', `ID: ${student_id}`);
       if (currentView === 'students') loadStudents();
-    });
+    });*/
 
     // Logout
     document.getElementById('btn-logout')?.addEventListener('click', () => Auth.logout());
@@ -1790,4 +1789,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (typeof window !== 'undefined') {
   window.SS = { Api, Auth, Router, Toast, Modal, SSEManager, Utils, NotifDropdown };
+}
+
+/* ================================================================
+   16. COMPATIBILIDAD GLOBAL
+   Expone las APIs que los HTML inline-scripts consumen directamente.
+   Los archivos HTML usan:  API.get/post/put/delete/login/register/forgotPassword
+                            showToast / openModal / closeModal
+                            formatDate / formatDateTime / formatRelativeTime
+   ================================================================ */
+
+/** Cliente HTTP global — misma lógica que Api pero con ruta relativa
+ *  detectada automáticamente según la página actual. */
+const API = (() => {
+  function base() {
+    return '/api';
+  }
+
+  function getToken() {
+    return localStorage.getItem('ss_token');
+  }
+
+  async function request(path, options = {}) {
+    const token = getToken();
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    // Normalizar path: quitar barra inicial si ya está en base
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const url = `${base()}/${cleanPath}`;
+
+    let body = options.body;
+    if (body && typeof body === 'object' && !(body instanceof FormData)) {
+      body = JSON.stringify(body);
+    } else if (body instanceof FormData) {
+      delete headers['Content-Type'];
+    }
+
+    try {
+      const res = await fetch(url, { ...options, headers, body });
+      // Intentar parsear JSON aunque sea error
+      const data = await res.json().catch(() => ({}));
+      // Devolver el objeto siempre; el caller decide si hay .error
+      return data;
+    } catch (err) {
+      console.error('API request error:', err);
+      return { error: 'Error de conexión' };
+    }
+  }
+
+  return {
+    get(path, params) {
+      let qs = '';
+      if (params) {
+        if (typeof params === 'string') {
+          // ya viene como query string "key=val&key2=val2"
+          qs = '?' + params;
+        } else {
+          qs = '?' + new URLSearchParams(params).toString();
+        }
+      }
+      return request(path + qs, { method: 'GET' });
+    },
+    post:   (path, body)   => request(path, { method: 'POST', body }),
+    put:    (path, body)   => request(path, { method: 'PUT',  body }),
+    delete: (path)         => request(path, { method: 'DELETE' }),
+
+    /** Shorthand de auth/login — devuelve { token, user } o { error } */
+    login(email, password) {
+      return request('auth/login', { method: 'POST', body: { email, password } });
+    },
+
+    /** Shorthand de auth/register */
+    register(payload) {
+      return request('auth/register', { method: 'POST', body: payload });
+    },
+
+    /** Shorthand de auth/forgot-password */
+    forgotPassword(email) {
+      return request('auth/forgot-password', { method: 'POST', body: { email } });
+    },
+  };
+})();
+
+/* ── Toasts globales ── */
+function showToast(title, message = '', type = 'info') {
+  Toast[type]?.(title, message) ?? Toast.info(title, message);
+}
+
+/* ── Modal globales ── */
+function openModal(id) { Modal.open(id); }
+function closeModal(id) { Modal.close(id); }
+
+/* ── Formateo de fechas global ── */
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(String(dateStr).includes('T') ? dateStr : dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('es-CO', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function formatRelativeTime(dateStr) {
+  return Utils.timeAgo(dateStr);
 }

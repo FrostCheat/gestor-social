@@ -1063,7 +1063,7 @@
 
   // ── SSE ──
   function setupSSE() {
-    const token = localStorage.getItem('ss_token');
+    /*const token = localStorage.getItem('ss_token');
     const es = new EventSource('../api/sse?token=' + token);
     es.addEventListener('stats_updated', e => {
       const d = JSON.parse(e.data);
@@ -1073,7 +1073,7 @@
       document.getElementById('st-pending').textContent   = d.pending_certificates || '—';
       document.getElementById('st-hours').textContent     = (d.total_hours || 0) + 'h';
     });
-    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };
+    es.onerror = () => { es.close(); setTimeout(setupSSE, 10000); };*/
   }
 
   // ── Helpers ──
